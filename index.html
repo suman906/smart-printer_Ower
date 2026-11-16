@@ -24,7 +24,7 @@ h2{font-size:15px;margin:0 0 10px;font-weight:700}
 .pr{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .pr b{display:block}.pr small{color:var(--mute)}
 .dotp{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--ok)}
-.dotp.off{background:var(--acc)}
+.dotp.off{background:var(--acc)}.dotp.unk{background:var(--mute)}.ico{width:18px;height:18px;vertical-align:-4px;margin-right:6px}
 .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
 .inp,select{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 11px;font:inherit;min-height:42px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -58,10 +58,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .hide{display:none!important}
 @media(max-width:760px){#list{grid-template-columns:1fr}}@media(max-width:520px){.order{grid-template-columns:1fr}.tk{border-right:0;border-bottom:2px dashed var(--line);padding:0 0 8px;text-align:left}.tk b{display:inline;font-size:36px}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"></script>
 </head>
 <body>
 <main>
-<header><span class="brand">Xerox Flow · Owner Desk</span><button class="btn" id="prb" type="button" aria-haspopup="dialog"><span class="plus" aria-hidden="true">+</span>Add pricing</button><span class="shop"><span>Sharma Xerox &amp; Stationery</span> · <input class="inp" type="date" id="dt" aria-label="Order date" style="min-height:34px;padding:4px 8px"></span></header>
+<header><span class="brand">Xerox Flow · Owner Desk <small id="fbs" style="font-size:12px;font-weight:700;font-stretch:100%;color:var(--mute)">● Connecting</small></span><button class="btn" id="prb" type="button" aria-haspopup="dialog"><span class="plus" aria-hidden="true">+</span>Add pricing</button><span class="shop"><span>Sharma Xerox &amp; Stationery</span> · <input class="inp" type="date" id="dt" aria-label="Order date" style="min-height:34px;padding:4px 8px"></span></header>
 
 <div class="stats" id="stats"></div>
 
@@ -69,97 +71,170 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 
 <div class="tools">
 <input class="inp" id="q" inputmode="numeric" placeholder="Find ticket, e.g. 32" aria-label="Find ticket number" style="width:170px">
+<button class="btn alt" id="prev" type="button" aria-haspopup="dialog">Previous</button>
 <div class="chips" id="flt"></div>
-<button class="btn alt" id="sim" type="button" style="margin-left:auto">+ Simulate new order</button>
+
 </div>
 
 <div id="list"></div>
-<p class="lab" style="margin-top:16px">Demo: printing and payments are simulated in this page. In production the print agent on this PC sends each job to the chosen printer, and orders and payments come from the cloud database.</p>
+<p class="lab" style="margin-top:16px">Orders, payments, prices and status sync live with Firebase. Printing itself is still simulated here: a print agent on this PC must send the real job to the printer.</p>
 </main>
 <div class="veil hide" id="pv"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ptl"><h2 id="ptl" style="font-size:20px;margin:0">Printing prices</h2><p class="lab" style="margin:4px 0 0">Price per page in ₹, for an A4 page. Other sizes scale automatically: A5 ×0.5, A3 ×2, Letter ×1, Legal ×1.25.</p><div class="pg"><b>Single-sided</b><label>Black &amp; white<input class="inp" id="p-sb" type="number" step="any" min="0" max="999" inputmode="decimal"></label><label>Colour<input class="inp" id="p-sc" type="number" step="any" min="0" max="999" inputmode="decimal"></label></div><div class="pg"><b>Double-sided</b><label>Black &amp; white<input class="inp" id="p-db" type="number" step="any" min="0" max="999" inputmode="decimal"></label><label>Colour<input class="inp" id="p-dc" type="number" step="any" min="0" max="999" inputmode="decimal"></label></div><div class="bad" id="perr" role="alert"></div><div class="act"><button class="btn" id="psave" type="button">Save prices</button><button class="btn alt" id="pcancel" type="button">Cancel</button></div><p class="lab" style="margin:12px 0 0">New prices apply to new orders. Existing orders keep the price the customer already saw.</p></div></div>
+<div class="veil hide" id="hv"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="htl" style="max-width:560px;max-height:85vh;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="htl" style="font-size:20px;margin:0">Previous orders (last 24 hours)</h2><button class="btn alt" id="hclose" type="button">Close</button></div><p class="lab" style="margin:4px 0 10px">Handed-over orders stay here for 24 hours after hand over, then they are deleted automatically.</p><div id="hlist" style="overflow:auto;display:grid;gap:8px"></div></div></div>
+<div class="veil hide" id="av"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="atl" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="atl" style="font-size:20px;margin:0">Add printer</h2><button class="btn alt" id="aclose" type="button">Close</button></div><p class="lab" id="agst" style="margin:6px 0 10px"></p><div id="alist" style="overflow:auto;display:grid;gap:8px"></div><details style="margin-top:12px"><summary class="lab" style="cursor:pointer">Printer not listed? Add it by name</summary><div class="act"><input class="inp" id="mname" placeholder="Printer name exactly as on this PC" style="flex:1;min-width:180px" aria-label="Printer name"><select id="mcol" aria-label="Printer type"><option value="0">B&amp;W only</option><option value="1">Colour + B&amp;W</option></select><button class="btn" id="madd" type="button">Add</button></div><p class="lab" style="margin:6px 0 0">Printers added by name show “status unknown” unless the print agent is running.</p></details></div></div>
 <div id="toast" class="hide" role="status"></div>
 
 <script>
 var RATE={single:{bw:2,color:10},double:{bw:1.5,color:8}},MULT={A4:1,A5:.5,A3:2,Letter:1,Legal:1.25};
-var P=[{id:"laser",name:"HP LaserJet Pro M126",kind:"Laser · B&W only",color:false,online:true},
-       {id:"aio",name:"Canon PIXMA G3010",kind:"All-in-one · Colour + B&W",color:true,online:true}];
-var DEF={bw:"laser",color:"aio"};
+var P=[],DEF={bw:"",color:""},AG={seen:0,host:"",list:[]},srvOff=0,LOADED={p:false,d:false},pendRm=null,lastSig="";
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function pr(id){return P.filter(function(p){return p.id===id})[0]}
+function agentAlive(){return AG.seen>0&&(Date.now()+srvOff-AG.seen)<20000}
+function pstat(p){if(!agentAlive())return"unknown";var d=AG.list.filter(function(x){return x&&x.name===p.name})[0];return d&&d.online?"online":"offline"}
+function pkey(n){return n.replace(/[.#$\/\[\]]/g,"_").trim()}
+function sig(){return agentAlive()+"|"+AG.list.map(function(x){return x.name+":"+x.online+":"+x.color}).join(",")+"|"+P.map(function(p){return p.id+":"+p.color+":"+pstat(p)}).join(",")+"|"+pendRm}
+function fixDefaults(){if(!LOADED.p||!LOADED.d)return;var ch=false;["bw","color"].forEach(function(k){
+  var ok=P.some(function(p){return p.id===DEF[k]&&(k==="bw"||p.color)});
+  if(!ok){var c=P.filter(function(p){return k==="bw"||p.color})[0],n=c?c.id:"";if(DEF[k]!==n){DEF[k]=n;ch=true}}});
+ if(ch&&DB)SH("settings/defaults").set(DEF)}
 function dkey(x){return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
 var today=dkey(new Date());$("#dt").value=today;$("#dt").max=today;
 $("#dt").onchange=function(){if(!this.value)this.value=today;draw()};
 setInterval(function(){var n=dkey(new Date());if(n!==today){var was=$("#dt").value===today;today=n;$("#dt").max=n;if(was)$("#dt").value=n;draw()}},60000);
 
-/* ===== orders ===== */
-var ORD=[],seq=28,filter="All",query="";
-function rid(n){var c="abcdefghijklmnopqrstuvwxyz0123456789",s="";for(var i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
-function mk(o){seq++;var sel=o.sel||o.pages,sides=Math.ceil(sel/o.nup),amt=Math.round(sides*RATE[o.sides][o.color]*MULT[o.size]*o.copies*2)/2;
- var x={id:seq,no:seq,name:o.name||"",file:o.file,pages:o.pages,sel:sel,range:o.range||"",copies:o.copies,size:o.size,color:o.color,sides:o.sides,nup:o.nup,amount:amt,
-  method:o.method,
-  cashIn:false,status:o.method==="upi"?"Paid":"Awaiting cash",printer:null,prog:0,time:new Date()};return x}
-var SEED=[["Aadhaar_front_back.pdf",2,"","1",2,"A4","bw","single",1,"upi"],["Resume_Rahul.pdf",3,"","2",1,"A4","color","single",1,"cash"],
- ["Class10_notes.pdf",24,"5-16",1,"A4","bw","double",2,"upi"],["Poster_sale.png",1,"",1,"A3","color","single",1,"upi"]];
-[{name:"Rahul Das",file:"Aadhaar_front_back.pdf",pages:2,copies:2,size:"A4",color:"bw",sides:"single",nup:1,method:"upi"},
- {name:"Priya Sen",file:"Resume_Rahul.pdf",pages:3,copies:1,size:"A4",color:"color",sides:"single",nup:1,method:"cash"},
- {name:"Amit Roy",file:"Class10_notes.pdf",pages:24,sel:12,range:"5-16",copies:2,size:"A4",color:"bw",sides:"double",nup:2,method:"upi"},
- {name:"Sneha Paul",file:"Poster_sale.png",pages:1,copies:1,size:"A3",color:"color",sides:"single",nup:1,method:"upi"}].forEach(function(o){ORD.push(mk(o))});
-$("#sim").onclick=function(){var f=["Bank_statement.pdf","Form16.pdf","Ticket_booking.pdf","Photo_id.jpg","Assignment_final.pdf","Menu_card.pdf"];
- var pg=1+Math.floor(Math.random()*20),co=1+Math.floor(Math.random()*3),c=Math.random()<.35?"color":"bw",m=Math.random()<.6?"upi":"cash";
- var NM=["Rohan Ghosh","Ananya Das","Suman Mondal","Pooja Singh","Imran Khan"];
- var o=mk({name:NM[Math.floor(Math.random()*NM.length)],file:f[Math.floor(Math.random()*f.length)],pages:pg,copies:co,size:"A4",color:c,sides:Math.random()<.4?"double":"single",nup:1,method:m});ORD.push(o);$("#dt").value=today;toast("New order #"+pad(o.no));draw()};
+/* ===== orders (live from Firebase) ===== */
+/* ===== FIREBASE (project xrox-data-base · number 746268562126) =====
+   If your Realtime Database was created in another region, copy the exact URL shown at the top of
+   Firebase console > Build > Realtime Database, and paste it into databaseURL. */
+var FB_CONFIG={projectId:"xrox-data-base",
+ databaseURL:"https://xrox-data-base-default-rtdb.firebaseio.com"};
+var SHOP_ID="sharma-xerox",DB=null,FB_OK=false;
+try{firebase.initializeApp(FB_CONFIG);DB=firebase.database();
+ DB.ref(".info/connected").on("value",function(s){FB_OK=!!s.val();var el=document.getElementById("fbs");if(el){el.textContent=FB_OK?"● Live":"● Offline";el.style.color=FB_OK?"var(--ok)":"var(--acc)"}})}catch(e){console.error("Firebase init failed",e)}
+function SH(p){return DB.ref("shops/"+SHOP_ID+(p?"/"+p:""))}
+
+var ORD=[],filter="All",query="",busy={};
+function fromDB(k,d,old){var fl=d.files||[],sel=0,sheets=0,col=false;
+ fl.forEach(function(f){sel+=f.sel;if(f.color==="color")col=true});
+ var f0=fl[0]||{};
+ return{id:k,no:d.ticket,name:d.name||"",file:fl.map(function(f){return f.file}).join(", ")||"(no file)",files:fl,
+  pages:fl.reduce(function(s,f){return s+f.pages},0),sel:sel,range:fl.length===1?(f0.range||""):"",copies:f0.copies||1,size:f0.size||"A4",
+  color:col?"color":"bw",sides:f0.sides||"single",nup:f0.nup||1,amount:d.amount,method:d.method,cashIn:d.status!=="Awaiting cash"&&d.method==="cash",
+  status:d.status||"Awaiting cash",printer:d.printer||null,prog:old?old.prog:0,time:new Date(d.createdAt||Date.now()),doneAt:d.deliveredAt||null}}
+function put(k,d){var old=ORD.filter(function(x){return x.id===k})[0],n=fromDB(k,d,old);
+ if(old)ORD[ORD.indexOf(old)]=n;else ORD.push(n)}
+function upd(o,f){if(!DB)return toast("Not connected");SH("orders/"+o.id).update(f).catch(function(){toast("Could not save. Check connection or database rules.")})}
+if(DB){
+ SH("orders").orderByChild("createdAt").limitToLast(500).on("child_added",function(s){put(s.key,s.val());draw()});
+ SH("orders").on("child_changed",function(s){put(s.key,s.val());draw()});
+ SH("orders").on("child_removed",function(s){ORD=ORD.filter(function(x){return x.id!==s.key});draw()});
+ SH("settings/rates").on("value",function(s){var v=s.val();if(v&&v.single&&v.double){RATE=v;draw()}else if(!v)SH("settings/rates").set(RATE)});
+ SH("settings/defaults").on("value",function(s){var v=s.val();DEF={bw:(v&&v.bw)||"",color:(v&&v.color)||""};LOADED.d=true;fixDefaults();lastSig=sig();draw()});
+ SH("printers").on("value",function(s){var v=s.val()||{};P=Object.keys(v).map(function(k){return{id:k,name:v[k].name||k,color:!!v[k].color,manual:!!v[k].manual}}).sort(function(a,b){return a.name<b.name?-1:1});
+  LOADED.p=true;fixDefaults();lastSig=sig();draw()});
+ SH("agent").on("value",function(s){var v=s.val()||{},l=v.printers||[];if(!Array.isArray(l))l=Object.keys(l).map(function(k){return l[k]});
+  AG={seen:v.seen||0,host:v.host||"",list:l.filter(Boolean)};var g=sig();if(g!==lastSig){lastSig=g;draw()}});
+ DB.ref(".info/serverTimeOffset").on("value",function(s){srvOff=s.val()||0});
+ setInterval(function(){var g=sig();if(g!==lastSig){lastSig=g;draw()}},5000)}
+/* ===== previous orders: handed over, kept 24 h then deleted ===== */
+var DAYMS=864e5;
+function doneTime(o){return o.doneAt||o.time.getTime()}
+function expired(o){return o.status==="Delivered"&&Date.now()-doneTime(o)>=DAYMS}
+function purge(){if(!DB)return;ORD.filter(expired).forEach(function(o){SH("orders/"+o.id).remove().catch(function(){})})}
+function histDraw(){var el=$("#hl"+"ist");if($("#hv").classList.contains("hide"))return;
+ var H=ORD.filter(function(o){return o.status==="Delivered"&&!expired(o)}).sort(function(a,b){return doneTime(b)-doneTime(a)});
+ el.innerHTML=H.length?H.map(function(o){var d=new Date(doneTime(o)),left=Math.max(0,Math.ceil((DAYMS-(Date.now()-doneTime(o)))/36e5));
+  return"<div class='card' style='padding:10px 12px'><div class='top' style='margin:0'><b>#"+pad(o.no)+(o.name?" · "+esc(o.name):"")+"</b><span class='tag'>Handed over "+d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+"</span></div>"+
+  "<div class='nm' style='margin:2px 0'>"+esc(o.file)+"</div><div class='lab'>"+o.sel+" pages · ₹"+o.amount+" "+(o.method==="upi"?"UPI":"cash")+" · created "+o.time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+" · deleted in ~"+left+" h</div></div>"}).join(""):"<div class='card empty'>No handed-over orders in the last 24 hours.</div>"}
+function openHist(){$("#hv").classList.remove("hide");histDraw();$("#hclose").focus()}
+function closeHist(){$("#hv").classList.add("hide");$("#prev").focus()}
+$("#prev").onclick=openHist;$("#hclose").onclick=closeHist;
+$("#hv").onclick=function(e){if(e.target===this)closeHist()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#hv").classList.contains("hide"))closeHist()});
+setInterval(function(){purge();histDraw();draw()},60000);setTimeout(purge,4000);
 function pad(n){return String(n).padStart(3,"0")}
-function printerFor(o){return pr(o.printer||DEF[o.color])}
+
+var ICO="<svg class='ico' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M6 9V3h12v6'/><rect x='3' y='9' width='18' height='8' rx='2'/><path d='M6 14h12v7H6z'/></svg>";
+function prsHTML(){
+ var rows=P.length?P.map(function(p){var st=pstat(p),txt=st==="online"?"Online":st==="offline"?(AG.list.some(function(x){return x&&x.name===p.name})?"Offline":"Offline · not found on this PC"):"Status unknown (agent not running)";
+  return"<div class='pr' style='margin-bottom:8px'><div><b><span class='dotp"+(st==="online"?"":st==="offline"?" off":" unk")+"'></span>"+esc(p.name)+"</b><small>"+(p.color?"Colour + B&W":"B&W only")+" · "+txt+"</small></div><button class='btn alt' data-rm='"+esc(p.id)+"' type='button'>"+(pendRm===p.id?"Tap again to remove":"Remove")+"</button></div>"}).join(""):
+  "<p class='lab' style='margin:0 0 8px'>No printer added yet. Tap “Add printer” to choose from this PC.</p>";
+ function opts(list,cur){return list.length?list.map(function(p){return"<option value='"+esc(p.id)+"'"+(cur===p.id?" selected":"")+">"+esc(p.name)+"</option>"}).join(""):"<option value=''>None added</option>"}
+ return"<div class='card'><div class='pr' style='margin-bottom:10px'><h2 style='margin:0'>Printers"+(agentAlive()?" <span class='lab' style='font-weight:400'>· live</span>":"")+"</h2><button class='btn' id='addp' type='button' aria-haspopup='dialog'>"+ICO+"Add printer</button></div>"+rows+"</div>"+
+ "<div class='card'><h2>Default printer</h2><div class='pr' style='margin-bottom:8px'><span>Black & white jobs</span><select data-def='bw' aria-label='Default printer for black and white'"+(P.length?"":" disabled")+">"+opts(P,DEF.bw)+"</select></div><div class='pr'><span>Colour jobs</span><select data-def='color' aria-label='Default printer for colour'"+(P.some(function(p){return p.color})?"":" disabled")+">"+opts(P.filter(function(p){return p.color}),DEF.color)+"</select></div></div>"}
+
+/* ===== add / remove printers ===== */
+function addDraw(){if($("#av").classList.contains("hide"))return;
+ var have={};P.forEach(function(p){have[p.name]=1});
+ $("#agst").textContent=agentAlive()?"Connected to “"+AG.host+"”. Printers installed on this PC are listed below with live status.":"The print agent isn’t running on the shop PC, so installed printers can’t be listed. Start print-agent.js (see setup notes), or add a printer by name below.";
+ var L=AG.list.filter(function(d){return !have[d.name]});
+ $("#alist").innerHTML=agentAlive()?(L.length?L.map(function(d,i){return"<div class='card pr' style='padding:10px 12px'><div><b><span class='dotp"+(d.online?"":" off")+"'></span>"+esc(d.name)+"</b><small>"+(d.online?"Online":"Offline")+"</small></div><div class='act' style='margin:0'><select aria-label='Type of "+esc(d.name)+"'><option value='0'"+(d.color===true?"":" selected")+">B&W only</option><option value='1'"+(d.color===true?" selected":"")+">Colour + B&W</option></select><button class='btn' data-add='"+i+"' type='button'>Add</button></div></div>"}).join(""):"<div class='card empty'>All printers found on this PC are already added.</div>"):"";
+ addDraw.L=L}
+function openAdd(){$("#av").classList.remove("hide");addDraw();$("#aclose").focus()}
+function closeAdd(){$("#av").classList.add("hide");$("#addp")&&$("#addp").focus()}
+function addPrinter(name,color,manual){name=(name||"").trim();if(!name)return toast("Enter the printer name");if(!DB)return toast("Not connected");
+ var k=pkey(name);if(!k)return toast("Invalid printer name");if(pr(k))return toast("That printer is already added");
+ var o={name:name,color:!!color};if(manual)o.manual=true;
+ SH("printers/"+k).set(o).then(function(){toast(name+" added")}).catch(function(){toast("Could not save. Check database rules.")})}
+$("#aclose").onclick=closeAdd;$("#av").onclick=function(e){if(e.target===this)closeAdd()};
+$("#madd").onclick=function(){var n=$("#mname");addPrinter(n.value,$("#mcol").value==="1",true);n.value=""};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#av").classList.contains("hide"))closeAdd()});
+function removePrinter(id){var p=pr(id);if(pendRm!==id){pendRm=id;clearTimeout(removePrinter.t);removePrinter.t=setTimeout(function(){pendRm=null;lastSig=sig();draw()},4000);return draw()}
+ pendRm=null;if(DB)SH("printers/"+id).remove().then(function(){toast((p?p.name:"Printer")+" removed")});draw()}
+function printerFor(o){return pr(o.printer)||pr(DEF[o.color])||P.filter(function(p){return o.color!=="color"||p.color})[0]||null}
 
 /* ===== rendering ===== */
-var FL=["All","To print","Awaiting cash","Printing","Ready","Delivered"];
-function sameDay(o){return dkey(o.time)===$("#dt").value}function matches(o){if(!sameDay(o))return false;if(query&&String(o.no).indexOf(query.replace(/^0+/,""))<0)return false;
- if(filter==="All")return true;if(filter==="To print")return o.status==="Paid";if(filter==="Awaiting cash")return o.status==="Awaiting cash";return o.status===filter}
-function draw(){
- var DAY=ORD.filter(sameDay),upi=0,cash=0,pend=0;DAY.forEach(function(o){if(o.method==="upi")upi+=o.amount;else if(o.cashIn)cash+=o.amount;else pend+=o.amount});
+var FL=["All","To print","Awaiting payment","Printing","Ready"];
+function sameDay(o){return dkey(o.time)===$("#dt").value}function matches(o){if(o.status==="Delivered")return false;if(!sameDay(o))return false;if(query&&String(o.no).indexOf(query.replace(/^0+/,""))<0)return false;
+ if(filter==="All")return true;if(filter==="To print")return o.status==="Paid";if(filter==="Awaiting payment")return /^Awaiting/.test(o.status);return o.status===filter}
+function draw(){try{histDraw()}catch(e){}
+ var DAY=ORD.filter(sameDay),upi=0,cash=0,pend=0;DAY.forEach(function(o){if(o.method==="upi"&&o.status!=="Awaiting UPI")upi+=o.amount;else if(o.cashIn)cash+=o.amount;else pend+=o.amount});
  $("#stats").innerHTML='<div class="card stat"><span>Orders today</span><b>'+DAY.length+'</b></div><div class="card stat"><span>UPI received</span><b>₹'+upi+'</b></div><div class="card stat"><span>Cash received</span><b>₹'+cash+'</b></div><div class="card stat"><span>Cash to collect</span><b>₹'+pend+'</b></div>';
- $("#prs").innerHTML="<div class='card'><h2>Printers (auto-routing)</h2>"+P.map(function(p){return"<div class='pr' style='margin-bottom:8px'><div><b><span class='dotp"+(p.online?"":" off")+"'></span>"+esc(p.name)+"</b><small>"+p.kind+"</small></div><button class='btn alt' data-tog='"+p.id+"' type='button'>"+(p.online?"Online":"Offline")+"</button></div>"}).join("")+"</div>"+
- "<div class='card'><h2>Default printer</h2><div class='pr' style='margin-bottom:8px'><span>Black & white jobs</span><select data-def='bw' aria-label='Default printer for black and white'>"+P.map(function(p){return"<option value='"+p.id+"'"+(DEF.bw===p.id?" selected":"")+">"+esc(p.name)+"</option>"}).join("")+"</select></div><div class='pr'><span>Colour jobs</span><select data-def='color' aria-label='Default printer for colour'>"+P.filter(function(p){return p.color}).map(function(p){return"<option value='"+p.id+"'"+(DEF.color===p.id?" selected":"")+">"+esc(p.name)+"</option>"}).join("")+"</select></div></div>";
+ $("#prs").innerHTML=prsHTML();addDraw();
  $("#flt").innerHTML=FL.map(function(f){return"<button class='chip' type='button' data-f='"+f+"' aria-pressed='"+(f===filter)+"'>"+f+"</button>"}).join("");
- var rank={Paid:0,"Awaiting cash":1,Printing:2,Ready:3,Delivered:4};
- var L=ORD.filter(matches).sort(function(a,b){return rank[a.status]-rank[b.status]||a.no-b.no});
+ var rank={Paid:0,"Awaiting cash":1,"Awaiting UPI":1,Printing:2,Ready:3,Delivered:4};
+ var L=ORD.filter(matches).sort(function(a,b){return a.time-b.time||a.no-b.no});
  $("#list").innerHTML=L.length?L.map(card).join(""):"<div class='card empty'>No orders match. Try another filter or ticket number.</div>"}
-function card(o){var p=printerFor(o),sides=Math.ceil(o.sel/o.nup),sheets=o.sides==="double"?Math.ceil(sides/2):sides,isCol=o.color==="color";
- var blocked=isCol&&!p.color,off=!p.online,needCash=o.method==="cash"&&!o.cashIn;
- var ids="<div class='nm'>Name <b>"+(o.name?esc(o.name):"—")+"</b></div>";var pay=o.method==="upi"?"<div class='amt'>UPI paid <b>₹"+o.amount+"</b></div>"
+function card(o){var p=printerFor(o),pn=p?p.name:"",sides=Math.ceil(o.sel/o.nup),sheets=o.sides==="double"?Math.ceil(sides/2):sides,isCol=o.color==="color";
+ var blocked=isCol&&p&&!p.color,off=p&&pstat(p)==="offline",noP=!p,needCash=o.status==="Awaiting cash"||o.status==="Awaiting UPI";
+ var ids="<div class='nm'>Name <b>"+(o.name?esc(o.name):"—")+"</b></div>";var pay=o.method==="upi"?(o.status==="Awaiting UPI"?"<div class='amt'>UPI to verify <b>₹"+o.amount+"</b></div>":"<div class='amt'>UPI paid <b>₹"+o.amount+"</b></div>")
   :(o.cashIn?"<div class='amt'>Cash received <b>₹"+o.amount+"</b></div>":"<div class='amt'>Cash to collect <b>₹"+o.amount+"</b></div>");
- var can=(o.status==="Paid"||o.status==="Ready"||o.status==="Delivered")&&!blocked&&!off;
+ var can=(o.status==="Paid"||o.status==="Ready"||o.status==="Delivered")&&!blocked&&!off&&!noP;
  var actions="";
+ if(o.status==="Awaiting UPI")actions+="<button class='btn' data-a='upi' data-id='"+o.id+"' type='button'>UPI received ₹"+o.amount+"</button>";
  if(o.status==="Awaiting cash")actions+="<button class='btn' data-a='cash' data-id='"+o.id+"' type='button'>Cash received ₹"+o.amount+"</button>";
  if(o.status==="Paid")actions+="<button class='btn' data-a='print' data-id='"+o.id+"' type='button'"+(can?"":" disabled")+">Print now</button>";
- if(o.status==="Printing")actions+="<span class='lab'>Sending to "+esc(p.name)+"…</span>";
+ if(o.status==="Printing")actions+="<span class='lab'>Sending to "+esc(pn)+"…</span>";
  if(o.status==="Ready"||o.status==="Delivered")actions+="<button class='btn alt' data-a='print' data-id='"+o.id+"' type='button'"+(can?"":" disabled")+">Reprint</button>";
  if(o.status==="Ready")actions+="<button class='btn' data-a='deliver' data-id='"+o.id+"' type='button'>Handed over</button>";
- var sel=(o.status==="Paid"||o.status==="Awaiting cash"||o.status==="Ready")?"<label class='lab'>Printer <select data-pr='"+o.id+"' aria-label='Printer for ticket "+pad(o.no)+"'>"+P.map(function(x){return"<option value='"+x.id+"'"+(x.id===p.id?" selected":"")+">"+esc(x.name)+"</option>"}).join("")+"</select></label>":"";
+ var sel=(o.status==="Paid"||/^Awaiting/.test(o.status)||o.status==="Ready")?"<label class='lab'>Printer <select data-pr='"+o.id+"' aria-label='Printer for ticket "+pad(o.no)+"'>"+P.map(function(x){return"<option value='"+esc(x.id)+"'"+(p&&x.id===p.id?" selected":"")+">"+esc(x.name)+"</option>"}).join("")+"</select></label>":"";
  return"<article class='card order'><div class='tk'><b>#"+pad(o.no)+"</b><small>"+o.time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+"</small></div><div>"+
  "<div class='top'><span class='fn'>"+esc(o.file)+"</span><span class='tag "+o.status.split(" ")[0]+"'>"+o.status+"</span></div>"+
- "<div class='specs'><span class='sp'>"+o.sel+" of "+o.pages+" pages"+(o.range?" ("+esc(o.range)+")":"")+"</span><span class='sp'>"+o.copies+" cop"+(o.copies>1?"ies":"y")+"</span><span class='sp'>"+(isCol?"Colour":"B&W")+"</span><span class='sp'>"+o.size+"</span><span class='sp'>"+(o.sides==="double"?"Double-sided":"Single-sided")+"</span><span class='sp'>"+({1:"1x1",2:"1x2",4:"2x2",9:"3x3"})[o.nup]+" per sheet</span><span class='sp'>"+sheets*o.copies+" sheets total</span></div>"+
+ (o.files.length>1?"<div class='specs'>"+o.files.map(function(f){return"<span class='sp'>"+esc(f.file)+" · "+f.sel+" pg × "+f.copies+" · "+(f.color==="color"?"Colour":"B&W")+" · "+f.size+" · "+(f.sides==="double"?"2-sided":"1-sided")+"</span>"}).join("")+"</div>":"")+(o.files.length>1?"":"<div class='specs'><span class='sp'>"+o.sel+" of "+o.pages+" pages"+(o.range?" ("+esc(o.range)+")":"")+"</span><span class='sp'>"+o.copies+" cop"+(o.copies>1?"ies":"y")+"</span><span class='sp'>"+(isCol?"Colour":"B&W")+"</span><span class='sp'>"+o.size+"</span><span class='sp'>"+(o.sides==="double"?"Double-sided":"Single-sided")+"</span><span class='sp'>"+({1:"1x1",2:"1x2",4:"2x2",9:"3x3"})[o.nup]+" per sheet</span><span class='sp'>"+sheets*o.copies+" sheets total</span></div>")+
  ""+
- ids+(blocked?"<div class='bad'>This is a colour job. "+esc(p.name)+" can’t print colour. Choose the all-in-one.</div>":"")+(off?"<div class='bad'>"+esc(p.name)+" is offline. Switch printer or bring it online.</div>":"")+
- (needCash?"<div class='warn'>Confirm cash first. Printing is locked until then.</div>":"")+
+ ids+(noP?"<div class='bad'>No printer added. Tap “Add printer” at the top.</div>":"")+(blocked?"<div class='bad'>This is a colour job. "+esc(pn)+" can’t print colour. Choose the all-in-one.</div>":"")+(off?"<div class='bad'>"+esc(pn)+" is offline. Switch printer or bring it online.</div>":"")+
+ (needCash?"<div class='warn'>Confirm the "+(o.status==="Awaiting UPI"?"UPI payment in your bank app":"cash")+" first. Printing is locked until then.</div>":"")+
  (o.status==="Printing"?"<div class='prog'><i style='width:"+o.prog+"%'></i></div>":"")+
  "<div class='foot'><div class='fl'>"+sel+"<div class='act'>"+actions+"</div></div><div class='pay"+((o.method==="upi"||o.cashIn)?"":" due")+"'>"+pay+"</div></div></div></article>"}
 
 /* ===== events ===== */
-function find(id){return ORD.filter(function(o){return o.id===+id})[0]}
+function find(id){return ORD.filter(function(o){return o.id===id})[0]}
 function toast(m){var t=$("#toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.add("hide")},2600)}
 document.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
  if(b.dataset.f){filter=b.dataset.f;return draw()}
- if(b.dataset.tog){var p=pr(b.dataset.tog);p.online=!p.online;toast(p.name+(p.online?" is online":" is offline"));return draw()}
+ if(b.dataset.rm)return removePrinter(b.dataset.rm);
+ if(b.id==="addp")return openAdd();
+ if(b.dataset.add!==undefined){var d=addDraw.L[+b.dataset.add],sl=b.parentNode.querySelector("select");if(d)addPrinter(d.name,sl.value==="1");return}
  var o=b.dataset.id&&find(b.dataset.id);if(!o)return;
- if(b.dataset.a==="cash"){o.cashIn=true;o.status="Paid";toast("Cash ₹"+o.amount+" recorded for #"+pad(o.no))}
- else if(b.dataset.a==="deliver"){o.status="Delivered";toast("#"+pad(o.no)+" handed over")}
+ if(b.dataset.a==="cash"){upd(o,{status:"Paid",cashIn:true});toast("Cash ₹"+o.amount+" recorded for #"+pad(o.no))}
+ else if(b.dataset.a==="upi"){upd(o,{status:"Paid"});toast("UPI ₹"+o.amount+" confirmed for #"+pad(o.no))}
+ else if(b.dataset.a==="deliver"){upd(o,{status:"Delivered",deliveredAt:Date.now()});toast("#"+pad(o.no)+" handed over")}
  else if(b.dataset.a==="print"){send(o)}
  draw()});
 document.addEventListener("change",function(e){var t=e.target;
- if(t.dataset.def){DEF[t.dataset.def]=t.value;toast("Default for "+(t.dataset.def==="bw"?"B&W":"colour")+" jobs updated");draw()}
- if(t.dataset.pr){find(t.dataset.pr).printer=t.value;draw()}});
+ if(t.dataset.def){if(!t.value)return;DEF[t.dataset.def]=t.value;if(DB)SH("settings/defaults").set(DEF);toast("Default for "+(t.dataset.def==="bw"?"B&W":"colour")+" jobs updated");draw()}
+ if(t.dataset.pr){var oo=find(t.dataset.pr);if(!oo)return;oo.printer=t.value;upd(oo,{printer:t.value});draw()}});
 $("#q").oninput=function(){query=this.value.trim();draw()};
 var PK={sb:["single","bw"],sc:["single","color"],db:["double","bw"],dc:["double","color"]};
 function openPr(){Object.keys(PK).forEach(function(k){$("#p-"+k).value=RATE[PK[k][0]][PK[k][1]]});$("#perr").textContent="";$("#pv").classList.remove("hide");$("#p-sb").focus()}
@@ -168,14 +243,14 @@ $("#prb").onclick=openPr;$("#pcancel").onclick=closePr;
 $("#pv").onclick=function(e){if(e.target===this)closePr()};
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#pv").classList.contains("hide"))closePr()});
 $("#psave").onclick=function(){var v={},k;for(k in PK){var n=parseFloat($("#p-"+k).value);if(!(n>=0&&n<=999)){$("#perr").textContent="Enter a price from 0 to 999 in every field.";return}v[k]=Math.round(n*100)/100}
- for(k in PK)RATE[PK[k][0]][PK[k][1]]=v[k];closePr();toast("Prices saved. They apply to new orders.")};
+ for(k in PK)RATE[PK[k][0]][PK[k][1]]=v[k];if(DB)SH("settings/rates").set(RATE);closePr();toast("Prices saved. They apply to new orders.")};
 
-/* ===== printing (simulated). Production: POST /orders/:id/print -> print agent -> SumatraPDF/Windows print API ===== */
+/* ===== printing (still simulated here). Real printing needs the print agent to send the file to the chosen printer ===== */
 function send(o){var p=printerFor(o);
- if(!p.online)return toast(p.name+" is offline");if(o.color==="color"&&!p.color)return toast("Choose a colour-capable printer");
- o.status="Printing";o.prog=0;
+ if(!p)return toast("Add a printer first");if(pstat(p)==="offline")return toast(p.name+" is offline");if(o.color==="color"&&!p.color)return toast("Choose a colour-capable printer");
+ o.status="Printing";o.prog=0;upd(o,{status:"Printing"});
  toast("Printing #"+pad(o.no)+" on "+p.name+": "+(o.color==="color"?"colour":"B&W")+", "+o.size+", "+(o.sides==="double"?"duplex":"simplex")+", "+o.copies+" cop"+(o.copies>1?"ies":"y"));
- var iv=setInterval(function(){o.prog+=10;if(o.prog>=100){clearInterval(iv);o.status="Ready";o.prog=0}draw()},350)}
+ var iv=setInterval(function(){var c=find(o.id)||o;c.prog+=10;if(c.prog>=100){clearInterval(iv);c.status="Ready";c.prog=0;upd(c,{status:"Ready"})}draw()},350)}
 draw();
 </script>
 </body>
