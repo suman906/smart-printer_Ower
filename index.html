@@ -3,179 +3,2770 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Xerox Flow: Owner Desk</title>
+<title>Xerox Flow: Print without the line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#EEF2F5;--surface:#fff;--ink:#14212B;--mute:#5B6B78;--line:#D3DCE3;--acc:#D8281F;--acc-ink:#fff;--ok:#12805C;--warn:#A86400;--chip:#E3EAF0;--sel:#14212B;--sel-ink:#fff;
+:root{--bg:#EEF2F5;--surface:#fff;--ink:#14212B;--mute:#5B6B78;--line:#D3DCE3;--acc:#D8281F;--acc-ink:#fff;--ok:#12805C;--chip:#E3EAF0;--sel:#14212B;--sel-ink:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E151B;--surface:#17212A;--ink:#EAF0F4;--mute:#97A6B2;--line:#2A3844;--acc:#FF5A4F;--acc-ink:#1A0604;--ok:#3FC79A;--warn:#F0B050;--chip:#22303B;--sel:#EAF0F4;--sel-ink:#14212B;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0E151B;--surface:#17212A;--ink:#EAF0F4;--mute:#97A6B2;--line:#2A3844;--acc:#FF5A4F;--acc-ink:#1A0604;--ok:#3FC79A;--warn:#F0B050;--chip:#22303B;--sel:#EAF0F4;--sel-ink:#14212B;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E151B;--surface:#17212A;--ink:#EAF0F4;--mute:#97A6B2;--line:#2A3844;--acc:#FF5A4F;--acc-ink:#1A0604;--ok:#3FC79A;--chip:#22303B;--sel:#EAF0F4;--sel-ink:#14212B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E151B;--surface:#17212A;--ink:#EAF0F4;--mute:#97A6B2;--line:#2A3844;--acc:#FF5A4F;--acc-ink:#1A0604;--ok:#3FC79A;--chip:#22303B;--sel:#EAF0F4;--sel-ink:#14212B;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 "Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:1000px;margin:0 auto;padding:16px}
-header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:14px}
-.brand{font-weight:800;font-stretch:75%;font-size:24px}.shop{color:var(--mute)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
-.stat span{color:var(--mute);font-size:13px;display:block}.stat b{font-size:24px;font-weight:800;font-stretch:80%}
-h2{font-size:15px;margin:0 0 10px;font-weight:700}
-.prs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:14px}
-.pr{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.pr b{display:block}.pr small{color:var(--mute)}
-.dotp{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--ok)}
-.dotp.off{background:var(--acc)}
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
-.inp,select{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 11px;font:inherit;min-height:42px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1.5px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 "Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px 16px 160px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:6px 0 18px}
+.brand{font-weight:800;font-stretch:75%;font-size:22px;letter-spacing:-.01em}
+.shop{color:var(--mute);font-size:14px;text-align:right}
+.now{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+h1{font-size:30px;line-height:1.05;font-weight:800;font-stretch:80%;margin:0 0 6px;letter-spacing:-.02em}
+.sub{color:var(--mute);margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+h2{font-size:15px;font-weight:700;margin:0 0 10px}
+.drop{display:block;border:2px dashed var(--line);border-radius:12px;padding:22px 12px;text-align:center;cursor:pointer;color:var(--mute)}
+.drop:focus-within,.drop:hover{border-color:var(--acc)}
+.drop b{display:block;color:var(--ink);font-size:17px}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.file{display:flex;gap:12px;align-items:center}
+.thumb{width:56px;height:72px;border-radius:6px;background:var(--chip);border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:12px;overflow:hidden;flex:none}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.fname{font-weight:600;word-break:break-all}
+.meta{color:var(--mute);font-size:14px}
+.link{background:none;border:0;color:var(--acc);font:inherit;font-weight:600;padding:4px 0;cursor:pointer}
+.row{margin-bottom:14px}.row:last-child{margin-bottom:0}
+.lab{display:block;font-size:14px;color:var(--mute);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:15px;cursor:pointer;min-height:40px}
 .chip[aria-pressed="true"]{background:var(--sel);color:var(--sel-ink);border-color:var(--sel);font-weight:700}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-#list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}.order{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;margin:0;padding:10px 12px}.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px 12px;margin-top:6px}.fl{display:flex;flex-direction:column;align-items:flex-start;gap:6px}.fl .act{margin:0}
-.tk{text-align:center;border-right:2px dashed var(--line);padding-right:12px}
-.tk b{display:block;font-size:34px;line-height:1;font-weight:900;font-stretch:70%}
-.tk small{color:var(--mute)}
-.top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
-.fn{font-weight:700;word-break:break-all}
-.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:700;background:var(--chip)}
-.tag.Paid,.tag.Ready{background:var(--ok);color:var(--acc-ink)}
-.tag.Awaiting{background:var(--warn);color:#fff}
-.tag.Printing{background:var(--sel);color:var(--sel-ink)}
-.specs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.sp{background:var(--chip);border-radius:8px;padding:3px 9px;font-size:13px}
-.pay{margin:0 0 0 auto;width:fit-content;max-width:100%;text-align:right;border-radius:10px;padding:4px 10px;border:1.5px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--surface))}.pay.due{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,var(--surface))}.amt{font-size:12px}.amt b{font-size:18px;font-weight:800;font-stretch:80%}.ids{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:0 14px;font-size:11px;color:var(--mute);margin:4px 0}.pay{flex:none}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px}
-.act{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
-.btn{border:0;border-radius:10px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:800;padding:0 18px;min-height:44px;cursor:pointer}
-.btn.alt{background:var(--chip);color:var(--ink);font-weight:700}
+.chip:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.inp{width:100%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit;min-height:44px}
+.inp.bad{border-color:var(--acc)}
+.err{color:var(--acc);font-size:13px;min-height:18px;margin-top:4px}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.stepper button{width:44px;height:44px;border:0;background:var(--chip);color:var(--ink);font-size:20px;cursor:pointer}
+.stepper input{width:56px;text-align:center;border:0;background:var(--surface);color:var(--ink);font:inherit;font-weight:700;height:44px}
+.pay{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--surface)}
+.opt[aria-checked="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none}
+.opt[aria-checked="true"] .dot{border:6px solid var(--ink)}
+.opt small{display:block;color:var(--mute)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar div{max-width:520px;margin:0 auto}
+.sum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.sum span{color:var(--mute);font-size:13px}
+.sum b{font-size:26px;font-weight:800;font-stretch:80%}
+.btn{width:100%;border:0;border-radius:12px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:800;font-size:17px;min-height:52px;cursor:pointer}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.warn{color:var(--warn);font-size:13px;margin-top:4px}.bad{color:var(--acc);font-size:13px;margin-top:4px}
-.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;background:var(--ok);width:0}
-.lab{font-size:13px;color:var(--mute)}
-.empty{text-align:center;color:var(--mute);padding:30px;grid-column:1/-1}
-.veil{position:fixed;inset:0;background:rgba(10,16,22,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}.sheet{background:var(--surface);width:100%;max-width:420px;border-radius:16px;padding:18px;border:1px solid var(--line)}.pg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.pg b{grid-column:1/-1}.pg label{font-size:13px;color:var(--mute)}.pg input{width:100%;margin-top:4px}.plus{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--acc-ink);color:var(--acc);font-weight:900;margin-right:8px;line-height:1}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--sel);color:var(--sel-ink);padding:10px 16px;border-radius:10px;font-weight:600;z-index:9;max-width:90vw}
+.priv{display:flex;gap:10px;color:var(--mute);font-size:13px;margin:4px 2px 12px}
+footer{text-align:center;margin-top:22px}
+footer b{display:block;font-size:18px;font-weight:800;font-stretch:80%}
+footer span{color:var(--mute);font-size:14px}
 .hide{display:none!important}
-@media(max-width:760px){#list{grid-template-columns:1fr}}@media(max-width:520px){.order{grid-template-columns:1fr}.tk{border-right:0;border-bottom:2px dashed var(--line);padding:0 0 8px;text-align:left}.tk b{display:inline;font-size:36px}}
+.veil{position:fixed;inset:0;background:rgba(10,16,22,.6);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px))}
+.lock{display:flex;gap:8px;align-items:center;color:var(--ok);font-weight:600;font-size:13px;margin-bottom:10px}
+.amt{font-size:34px;font-weight:800;font-stretch:80%;margin:2px 0 12px}
+.trust{color:var(--mute);font-size:12.5px;margin-top:10px}
+.qr{width:200px;height:200px;margin:4px auto 10px;background:#fff;border-radius:10px;padding:6px;border:1px solid var(--line)}
+.qr svg{width:100%;height:100%;display:block}
+.payto{text-align:center;font-size:14px;color:var(--mute)}.payto b{color:var(--ink);user-select:all}
+.spin{width:36px;height:36px;border:4px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;margin:10px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:16px;position:relative;text-align:center;padding:26px 16px 22px;margin:8px 0 14px}
+.ticket::before,.ticket::after{content:"";position:absolute;top:58%;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.ticket::before{left:-12px}.ticket::after{right:-12px}
+.tno{font-size:84px;line-height:1;font-weight:900;font-stretch:70%;letter-spacing:-.02em}
+.perf{border-top:2px dashed var(--line);margin:18px 6px 14px}
+.steps{display:flex;justify-content:space-between;margin:14px 0 4px;gap:4px}
+.st{flex:1;text-align:center;font-size:12.5px;color:var(--mute)}
+.st i{display:block;height:6px;border-radius:3px;background:var(--line);margin-bottom:6px}
+.st.on{color:var(--ink);font-weight:700}.st.on i{background:var(--ok)}
+.pill{display:inline-block;background:var(--chip);border-radius:999px;padding:4px 12px;font-size:13px}
+.demo{font-size:12px;color:var(--mute);text-align:center;margin-top:8px}
+/* ===== redesigned print block ===== */
+:root{--g:#2F7D12;--g-ink:#fff;--g-soft:#E9F8E4;--tile:#F3F5F8;--stage:#EDF0F3;--paper-sh:0 2px 10px rgba(20,33,43,.18)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g:#58C441;--g-ink:#06210A;--g-soft:#17301F;--tile:#1E2A34;--stage:#0F1820;--paper-sh:0 2px 12px rgba(0,0,0,.5)}}
+:root[data-theme="dark"]{--g:#58C441;--g-ink:#06210A;--g-soft:#17301F;--tile:#1E2A34;--stage:#0F1820;--paper-sh:0 2px 12px rgba(0,0,0,.5)}
+.addrow{display:flex;justify-content:flex-end;margin:0 0 10px}
+.addf{display:inline-flex;gap:7px;align-items:center;border:1.5px solid var(--g);color:var(--g);background:var(--g-soft);border-radius:999px;padding:8px 14px;font-weight:600;font-size:15px;cursor:pointer}
+.addf input{position:absolute;opacity:0;width:1px;height:1px}
+.addf:focus-within{outline:3px solid var(--g);outline-offset:2px}
+.car{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 4%;scrollbar-width:none;position:relative;-webkit-overflow-scrolling:touch;margin:0 -16px}
+.car::-webkit-scrollbar{display:none}
+.car.single{padding:0 16px}
+.slide{flex:0 0 100%;scroll-snap-align:center;min-width:0}
+.stage{position:relative;height:340px;background:var(--stage);border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;overflow:hidden}
+.paper{display:grid;gap:5px;padding:7px;background:#fff;box-shadow:var(--paper-sh);transition:width .25s,height .25s}
+.cell{min-width:0;min-height:0;display:grid;place-items:center;overflow:hidden;background:#fff}
+.cell img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block;transition:filter .2s}
+.cell.ph{background:#F6F7F8;border:1px solid #E4E8EB}
+.cell.ph i{display:block;width:60%;height:5px;border-radius:3px;background:#D6DCE1;margin:4px auto}
+.cell.ph em{font:800 13px/1 "Archivo",sans-serif;font-style:normal;color:#8896A1}
+.cell.blank{background:#fff}
+.x{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);font-size:18px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);z-index:2}
+.fn{position:absolute;top:10px;left:10px;max-width:calc(100% - 60px);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(0,0,0,.2);z-index:2}
+.sp{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:var(--surface);border-radius:999px;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.25);z-index:2;white-space:nowrap}
+.sp button{width:30px;height:28px;border:0;background:none;color:var(--ink);font-size:18px;cursor:pointer;border-radius:50%}
+.sp button:disabled{opacity:.3;cursor:default}
+.sp span{font-size:12.5px;font-weight:600;padding:0 6px}
+.pager{display:flex;justify-content:center;align-items:center;gap:6px;margin:10px 0 12px;min-height:22px}
+.pager .d{width:7px;height:7px;border-radius:50%;background:var(--line);border:0;padding:0;cursor:pointer}
+.pager .n{background:#2B2F33;color:#fff;border-radius:999px;font-size:12px;font-weight:600;padding:3px 10px}
+.c2{border-radius:14px;padding:16px;background:var(--surface);margin-bottom:12px;border:1px solid var(--line)}
+.c2 h3{margin:0 0 12px;font-size:17px;font-weight:600}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.crow h3{margin:0 0 2px}
+.crow .meta{font-size:15px}
+.gstep{display:inline-flex;align-items:center;background:var(--g);color:var(--g-ink);border-radius:10px;overflow:hidden;flex:none}
+.gstep button{width:36px;height:38px;border:0;background:none;color:inherit;font-size:20px;cursor:pointer}
+.gstep input{width:34px;text-align:center;border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:0}
+.gstep input:focus-visible{outline-color:var(--g-ink);outline-offset:0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.tile{display:flex;gap:10px;align-items:center;text-align:left;padding:10px 12px;min-height:56px;border:1.5px solid var(--line);background:var(--tile);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+.tile b{display:block;font-weight:600;font-size:15px}
+.tile small{display:block;color:var(--mute);font-size:14px}
+.tile svg{flex:none}
+.tile[aria-pressed="true"]{background:var(--g-soft);border-color:var(--g)}
+.tile:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.sub3{font-size:17px;font-weight:600;margin:0 0 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{margin-bottom:14px;min-width:0}
+.fld>.lab{margin-bottom:6px}
+.sel{position:relative}
+.sel select{width:100%;appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:var(--tile);color:var(--ink);border-radius:10px;padding:0 34px 0 12px;min-height:46px;font:inherit;font-weight:600;cursor:pointer}
+.sel select:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.sel::after{content:"";position:absolute;right:14px;top:50%;width:8px;height:8px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.fixed{display:flex;justify-content:space-between;align-items:center;min-height:46px;padding:0 12px;border:1.5px solid var(--line);background:var(--tile);color:var(--ink);border-radius:10px;font-weight:600;opacity:.85;cursor:default;user-select:none}
+.fixed small{color:var(--mute);font-weight:500;font-size:13px}
+.inp.bad{border-color:var(--acc)}
+.btn.go{background:var(--g);color:var(--g-ink)}
+.sum span{font-size:15px;color:var(--ink)}
+.sum small{display:block;color:var(--mute);font-size:12.5px}
+
 </style>
 </head>
 <body>
 <main>
-<header><span class="brand">Xerox Flow · Owner Desk</span><button class="btn" id="prb" type="button" aria-haspopup="dialog"><span class="plus" aria-hidden="true">+</span>Add pricing</button><span class="shop"><span>Sharma Xerox &amp; Stationery</span> · <input class="inp" type="date" id="dt" aria-label="Order date" style="min-height:34px;padding:4px 8px"></span></header>
+<header><span class="brand">Xerox Flow</span><span class="shop"><span class="now" id="nowDt"></span></span></header>
 
-<div class="stats" id="stats"></div>
+<section id="vOrder">
+<h1>Scan. Upload. Collect.</h1>
+<p class="sub">No app, no WhatsApp. Set your print options and pick up with a ticket number.</p>
 
-<div class="prs" id="prs"></div>
+<div class="card" id="cFile">
+<h2>Your document</h2>
+<label class="drop" id="drop"><b>Tap to upload</b>PDF, JPG or PNG (Word and HEIC also work)<input type="file" id="fi" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.heic,application/pdf,image/*"></label>
+</div>
+<div class="err" id="ferr" role="alert"></div>
 
-<div class="tools">
-<input class="inp" id="q" inputmode="numeric" placeholder="Find ticket, e.g. 32" aria-label="Find ticket number" style="width:170px">
-<div class="chips" id="flt"></div>
-<button class="btn alt" id="sim" type="button" style="margin-left:auto">+ Simulate new order</button>
+<div id="docs" class="hide">
+<div class="addrow"><label class="addf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V9z"/><path d="M13 3v6h6"/><path d="M12 12.5v5M9.5 15h5"/></svg>Add files<input type="file" id="fa" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.heic,application/pdf,image/*"></label></div>
+<div class="car" id="car" aria-label="Your files. Swipe to switch"></div>
+<div class="pager" id="pager"></div>
+
+<div class="c2"><div class="crow"><div><h3>Number of copies</h3><div class="meta" id="fileLine">File 1 (1 page)</div></div>
+<div class="gstep"><button type="button" id="cm" aria-label="Fewer copies">−</button><input id="cp" inputmode="numeric" value="1" aria-label="Copies"><button type="button" id="cpp" aria-label="More copies">+</button></div></div>
+<div class="row hide" id="pgRow" style="margin:14px 0 0"><div class="crow"><span class="meta">Pages in this file (Word files: enter the count)</span>
+<div class="gstep"><button type="button" id="pm" aria-label="Fewer pages">−</button><input id="pgs" inputmode="numeric" value="1" aria-label="Total pages"><button type="button" id="pp" aria-label="More pages">+</button></div></div></div></div>
+
+<div class="c2">
+<h3>Choose print color</h3>
+<div class="tiles" id="t-color">
+<button type="button" class="tile" data-v="color"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><g style="mix-blend-mode:multiply"><circle cx="17" cy="11" r="8" fill="#FFD400"/><circle cx="11.5" cy="21" r="8" fill="#E5007D"/><circle cx="22.5" cy="21" r="8" fill="#009FE3"/></g></svg><span><b>Coloured</b><small id="r-color"></small></span></button>
+<button type="button" class="tile" data-v="bw"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="11" r="8" fill="#D5D8DB"/><circle cx="11.5" cy="21" r="8" fill="#6B7075"/><circle cx="22.5" cy="21" r="8" fill="#3A3F44" fill-opacity=".9"/></svg><span><b>B &amp; W</b><small id="r-bw"></small></span></button></div>
+<h3>Choose print orientation</h3>
+<div class="tiles" id="t-orient">
+<button type="button" class="tile" data-v="portrait"><svg width="30" height="34" viewBox="0 0 30 34" aria-hidden="true"><path d="M5 2h14l7 7v21a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2z" fill="#4C8DF6"/><path d="M19 2l7 7h-5a2 2 0 01-2-2z" fill="#9CC0FA"/><circle cx="14.5" cy="15" r="2.6" fill="#fff"/><path d="M10.5 25v-5a4 4 0 018 0v5z" fill="#fff"/></svg><span><b>Portrait</b><small id="d-por"></small></span></button>
+<button type="button" class="tile" data-v="landscape"><svg width="34" height="30" viewBox="0 0 34 30" aria-hidden="true"><path d="M2 5a2 2 0 012-2h21l7 7v16a2 2 0 01-2 2H4a2 2 0 01-2-2z" fill="#4C8DF6"/><path d="M25 3l7 7h-5a2 2 0 01-2-2z" fill="#9CC0FA"/><circle cx="12" cy="12.5" r="2.6" fill="#fff"/><path d="M8 23v-5a4 4 0 018 0v5z" fill="#fff"/></svg><span><b>Landscape</b><small id="d-lan"></small></span></button></div>
+<div class="fld"><span class="lab">Paper size</span><div class="fixed" aria-label="Paper size: A4, fixed">A4<small>Fixed</small></div></div>
+<div class="two">
+<div class="fld"><label class="lab" for="s-sides">Sides</label><div class="sel"><select id="s-sides"><option value="single">Single side</option><option value="double">Both sides</option></select></div></div>
+<div class="fld"><label class="lab" for="s-nup">Pages per sheet</label><div class="sel"><select id="s-nup"></select></div></div></div>
+<div class="fld" style="margin-bottom:0"><label class="lab" for="range">Pages to print (blank for all)</label><input class="inp" id="range" placeholder="e.g. 1-3, 5, 8-10" autocomplete="off"><div class="err" id="rerr" role="alert"></div></div>
+</div>
 </div>
 
-<div id="list"></div>
-<p class="lab" style="margin-top:16px">Demo: printing and payments are simulated in this page. In production the print agent on this PC sends each job to the chosen printer, and orders and payments come from the cloud database.</p>
+<div class="card">
+<h2>How will you pay?</h2>
+<div class="pay" role="radiogroup" aria-label="Payment method">
+<div class="opt" role="radio" tabindex="0" aria-checked="true" data-m="upi"><span class="dot"></span><span><b>Pay online with UPI</b><small>Printing starts right after payment</small></span></div>
+<div class="opt" role="radio" tabindex="0" aria-checked="false" data-m="cash"><span class="dot"></span><span><b>Pay cash at counter</b><small>Staff confirm your order, then it prints</small></span></div>
+</div></div>
+
+<div class="priv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg><span>Your file is sent over an encrypted connection and deleted within 24 hours of printing. Only this shop can see it.</span></div>
+<footer><b>Na Galti, Na Line, Na Confusion</b><span>No Bhid, Instant Print</span></footer>
+</section>
+
+<section id="vTicket" class="hide">
+<h1 id="tTitle">Order placed</h1>
+<p class="sub" id="tSub"></p>
+<div class="ticket"><div class="meta">Your ticket number</div><div class="tno" id="tno">#000</div>
+<div class="perf"></div><div class="meta" id="tsum"></div><div style="margin-top:10px"><span class="pill" id="tnow"></span></div></div>
+<div class="card"><h2>Order status</h2><div class="steps" id="steps"></div><div class="meta" id="stmsg" style="margin-top:10px"></div></div>
+<button class="btn" id="again" type="button" style="background:var(--sel);color:var(--sel-ink)">Start a new order</button>
+<div class="demo">Demo mode: statuses are simulated. In production the shop’s print agent updates them live.</div>
+</section>
 </main>
-<div class="veil hide" id="pv"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ptl"><h2 id="ptl" style="font-size:20px;margin:0">Printing prices</h2><p class="lab" style="margin:4px 0 0">Price per page in ₹, for an A4 page. Other sizes scale automatically: A5 ×0.5, A3 ×2, Letter ×1, Legal ×1.25.</p><div class="pg"><b>Single-sided</b><label>Black &amp; white<input class="inp" id="p-sb" type="number" step="any" min="0" max="999" inputmode="decimal"></label><label>Colour<input class="inp" id="p-sc" type="number" step="any" min="0" max="999" inputmode="decimal"></label></div><div class="pg"><b>Double-sided</b><label>Black &amp; white<input class="inp" id="p-db" type="number" step="any" min="0" max="999" inputmode="decimal"></label><label>Colour<input class="inp" id="p-dc" type="number" step="any" min="0" max="999" inputmode="decimal"></label></div><div class="bad" id="perr" role="alert"></div><div class="act"><button class="btn" id="psave" type="button">Save prices</button><button class="btn alt" id="pcancel" type="button">Cancel</button></div><p class="lab" style="margin:12px 0 0">New prices apply to new orders. Existing orders keep the price the customer already saw.</p></div></div>
-<div id="toast" class="hide" role="status"></div>
+
+<div class="bar" id="bar"><div>
+<div class="sum"><span id="brk">Add a document to see the price</span><b id="tot">₹0</b></div>
+<button class="btn go" id="go" type="button" disabled>Pay with UPI</button></div></div>
+
+<div class="veil hide" id="veil"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pt">
+<div id="p1">
+<div class="lock"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Pay with any UPI app</div>
+<div class="meta" id="pt">Pay <span id="pshop"></span></div><div class="amt" id="pamt"></div>
+<div class="qr" id="qr" role="img" aria-label="UPI payment QR code"></div>
+<div class="payto">UPI ID: <b id="vpa"></b> <button class="chip" id="copyv" type="button">Copy</button></div>
+<button class="btn" id="upiapp" type="button" style="margin-top:12px">Open UPI app</button>
+<div class="trust" style="margin:10px 0 6px">Scan the QR with GPay, PhonePe, Paytm or any UPI app, or tap the button on your phone. The amount is filled in for you. After paying, tap “I’ve paid”.</div>
+<label class="lab" for="utr">UPI reference number (optional)</label>
+<input class="inp" id="utr" inputmode="numeric" maxlength="12" placeholder="12-digit UTR from your app" autocomplete="off">
+<div class="err" id="uerr" role="alert"></div>
+<button class="btn" id="pay" type="button">I’ve paid</button>
+<button class="link" id="pcancel" type="button" style="width:100%;margin-top:6px">Cancel</button>
+<div class="trust">The money goes straight to the shop’s UPI account. This page never sees your UPI PIN. The shop confirms your payment before printing.</div>
+</div>
+<div id="p2" class="hide" style="text-align:center"><div class="spin"></div><b>Waiting for payment</b><div class="meta">Finish the payment in the window that opened.</div></div>
+</div></div>
 
 <script>
-var RATE={single:{bw:2,color:10},double:{bw:1.5,color:8}},MULT={A4:1,A5:.5,A3:2,Letter:1,Legal:1.25};
-var P=[{id:"laser",name:"HP LaserJet Pro M126",kind:"Laser · B&W only",color:false,online:true},
-       {id:"aio",name:"Canon PIXMA G3010",kind:"All-in-one · Colour + B&W",color:true,online:true}];
-var DEF={bw:"laser",color:"aio"};
+/* ===== CONFIG ===== */
+var CFG={shop:"Sharma Xerox & Stationery",shopId:"sharma-xerox",
+ rate:{bw:2,color:10},               /* ₹ per printed side, A4 */
+ mult:{A4:1,A5:.5,A3:2,Letter:1,Legal:1.25},
+ maxMB:25,
+ upiId:"8597442748@ptsbi",           /* shop's receiving UPI ID */
+ gateway:"direct",                   /* "direct" = QR + UPI app link now; "youpi" = YouPI-PG checkout (fill in youpi below) */
+ youpi:{src:"",key:""}               /* src: "https://pay.yourdomain.com/youpi.js"  key: your merchant PUBLIC key */};
 var $=function(s){return document.querySelector(s)};
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-function pr(id){return P.filter(function(p){return p.id===id})[0]}
-function dkey(x){return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
-var today=dkey(new Date());$("#dt").value=today;$("#dt").max=today;
-$("#dt").onchange=function(){if(!this.value)this.value=today;draw()};
-setInterval(function(){var n=dkey(new Date());if(n!==today){var was=$("#dt").value===today;today=n;$("#dt").max=n;if(was)$("#dt").value=n;draw()}},60000);
+$("#pshop").textContent=CFG.shop;
+if(window.pdfjsLib){try{pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"}catch(e){}}
+CFG.maxFiles=10;
+/* current date, top right */
+function tickClock(){var d=new Date(),z=function(n){return(n<10?"0":"")+n};
+ var days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ $("#nowDt").textContent=days[d.getDay()]+", "+d.getDate()+" "+mon[d.getMonth()]+" "+d.getFullYear()}
+tickClock();setInterval(tickClock,60000);
+var SIZES={A4:[8.3,11.7],A3:[11.7,16.5],A5:[5.8,8.3],Letter:[8.5,11],Legal:[8.5,14]};
+var NUP=[["1x1","1 × 1",1,1,1],["1x2","1 × 2",2,2,1],["2x2","2 × 2",4,2,2],["2x3","2 × 3",6,3,2],["3x3","3 × 3",9,3,3]]; /* key,label,pages,cols,rows */
+function nupOf(k){for(var i=0;i<NUP.length;i++)if(NUP[i][0]===k)return{n:NUP[i][2],cols:NUP[i][3],rows:NUP[i][4]};return{n:1,cols:1,rows:1}}
+var F=[],A=0;
+function cur(){return F[A]}
+function inr(n){return"₹"+(n%1?n.toFixed(1):n)}
+function plural(n,w){return n+" "+w+(n===1?"":"s")}
 
-/* ===== orders ===== */
-var ORD=[],seq=28,filter="All",query="";
-function rid(n){var c="abcdefghijklmnopqrstuvwxyz0123456789",s="";for(var i=0;i<n;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
-function mk(o){seq++;var sel=o.sel||o.pages,sides=Math.ceil(sel/o.nup),amt=Math.round(sides*RATE[o.sides][o.color]*MULT[o.size]*o.copies*2)/2;
- var x={id:seq,no:seq,file:o.file,pages:o.pages,sel:sel,range:o.range||"",copies:o.copies,size:o.size,color:o.color,sides:o.sides,nup:o.nup,amount:amt,
-  method:o.method,txn:o.method==="upi"?"UPI"+String(Math.floor(Math.random()*9e11)+1e11):null,gw:o.method==="upi"?"pay_"+rid(14):null,
-  cashIn:false,status:o.method==="upi"?"Paid":"Awaiting cash",printer:null,prog:0,time:new Date()};return x}
-var SEED=[["Aadhaar_front_back.pdf",2,"","1",2,"A4","bw","single",1,"upi"],["Resume_Rahul.pdf",3,"","2",1,"A4","color","single",1,"cash"],
- ["Class10_notes.pdf",24,"5-16",1,"A4","bw","double",2,"upi"],["Poster_sale.png",1,"",1,"A3","color","single",1,"upi"]];
-[{file:"Aadhaar_front_back.pdf",pages:2,copies:2,size:"A4",color:"bw",sides:"single",nup:1,method:"upi"},
- {file:"Resume_Rahul.pdf",pages:3,copies:1,size:"A4",color:"color",sides:"single",nup:1,method:"cash"},
- {file:"Class10_notes.pdf",pages:24,sel:12,range:"5-16",copies:2,size:"A4",color:"bw",sides:"double",nup:2,method:"upi"},
- {file:"Poster_sale.png",pages:1,copies:1,size:"A3",color:"color",sides:"single",nup:1,method:"upi"}].forEach(function(o){ORD.push(mk(o))});
-$("#sim").onclick=function(){var f=["Bank_statement.pdf","Form16.pdf","Ticket_booking.pdf","Photo_id.jpg","Assignment_final.pdf","Menu_card.pdf"];
- var pg=1+Math.floor(Math.random()*20),co=1+Math.floor(Math.random()*3),c=Math.random()<.35?"color":"bw",m=Math.random()<.6?"upi":"cash";
- var o=mk({file:f[Math.floor(Math.random()*f.length)],pages:pg,copies:co,size:"A4",color:c,sides:Math.random()<.4?"double":"single",nup:1,method:m});ORD.push(o);$("#dt").value=today;toast("New order #"+pad(o.no));draw()};
-function pad(n){return String(n).padStart(3,"0")}
-function printerFor(o){return pr(o.printer||DEF[o.color])}
+/* ===== static controls ===== */
 
-/* ===== rendering ===== */
-var FL=["All","To print","Awaiting cash","Printing","Ready","Delivered"];
-function sameDay(o){return dkey(o.time)===$("#dt").value}function matches(o){if(!sameDay(o))return false;if(query&&String(o.no).indexOf(query.replace(/^0+/,""))<0)return false;
- if(filter==="All")return true;if(filter==="To print")return o.status==="Paid";if(filter==="Awaiting cash")return o.status==="Awaiting cash";return o.status===filter}
-function draw(){
- var DAY=ORD.filter(sameDay),upi=0,cash=0,pend=0;DAY.forEach(function(o){if(o.method==="upi")upi+=o.amount;else if(o.cashIn)cash+=o.amount;else pend+=o.amount});
- $("#stats").innerHTML='<div class="card stat"><span>Orders today</span><b>'+DAY.length+'</b></div><div class="card stat"><span>UPI received</span><b>₹'+upi+'</b></div><div class="card stat"><span>Cash received</span><b>₹'+cash+'</b></div><div class="card stat"><span>Cash to collect</span><b>₹'+pend+'</b></div>';
- $("#prs").innerHTML="<div class='card'><h2>Printers (auto-routing)</h2>"+P.map(function(p){return"<div class='pr' style='margin-bottom:8px'><div><b><span class='dotp"+(p.online?"":" off")+"'></span>"+esc(p.name)+"</b><small>"+p.kind+"</small></div><button class='btn alt' data-tog='"+p.id+"' type='button'>"+(p.online?"Online":"Offline")+"</button></div>"}).join("")+"</div>"+
- "<div class='card'><h2>Default printer</h2><div class='pr' style='margin-bottom:8px'><span>Black & white jobs</span><select data-def='bw' aria-label='Default printer for black and white'>"+P.map(function(p){return"<option value='"+p.id+"'"+(DEF.bw===p.id?" selected":"")+">"+esc(p.name)+"</option>"}).join("")+"</select></div><div class='pr'><span>Colour jobs</span><select data-def='color' aria-label='Default printer for colour'>"+P.filter(function(p){return p.color}).map(function(p){return"<option value='"+p.id+"'"+(DEF.color===p.id?" selected":"")+">"+esc(p.name)+"</option>"}).join("")+"</select></div></div>";
- $("#flt").innerHTML=FL.map(function(f){return"<button class='chip' type='button' data-f='"+f+"' aria-pressed='"+(f===filter)+"'>"+f+"</button>"}).join("");
- var rank={Paid:0,"Awaiting cash":1,Printing:2,Ready:3,Delivered:4};
- var L=ORD.filter(matches).sort(function(a,b){return rank[a.status]-rank[b.status]||a.no-b.no});
- $("#list").innerHTML=L.length?L.map(card).join(""):"<div class='card empty'>No orders match. Try another filter or ticket number.</div>"}
-function card(o){var p=printerFor(o),sides=Math.ceil(o.sel/o.nup),sheets=o.sides==="double"?Math.ceil(sides/2):sides,isCol=o.color==="color";
- var blocked=isCol&&!p.color,off=!p.online,needCash=o.method==="cash"&&!o.cashIn;
- var ids=o.method==="upi"?"<div class='ids'><span>Txn ID <span class='mono'>"+o.txn+"</span></span><span>Gateway ref <span class='mono'>"+o.gw+"</span></span></div>":(o.cashIn?"":"<div class='ids'>No transaction ID for cash</div>");var pay=o.method==="upi"?"<div class='amt'>UPI paid <b>₹"+o.amount+"</b></div>"
-  :(o.cashIn?"<div class='amt'>Cash received <b>₹"+o.amount+"</b></div>":"<div class='amt'>Cash to collect <b>₹"+o.amount+"</b></div>");
- var can=(o.status==="Paid"||o.status==="Ready"||o.status==="Delivered")&&!blocked&&!off;
- var actions="";
- if(o.status==="Awaiting cash")actions+="<button class='btn' data-a='cash' data-id='"+o.id+"' type='button'>Cash received ₹"+o.amount+"</button>";
- if(o.status==="Paid")actions+="<button class='btn' data-a='print' data-id='"+o.id+"' type='button'"+(can?"":" disabled")+">Print now</button>";
- if(o.status==="Printing")actions+="<span class='lab'>Sending to "+esc(p.name)+"…</span>";
- if(o.status==="Ready"||o.status==="Delivered")actions+="<button class='btn alt' data-a='print' data-id='"+o.id+"' type='button'"+(can?"":" disabled")+">Reprint</button>";
- if(o.status==="Ready")actions+="<button class='btn' data-a='deliver' data-id='"+o.id+"' type='button'>Handed over</button>";
- var sel=(o.status==="Paid"||o.status==="Awaiting cash"||o.status==="Ready")?"<label class='lab'>Printer <select data-pr='"+o.id+"' aria-label='Printer for ticket "+pad(o.no)+"'>"+P.map(function(x){return"<option value='"+x.id+"'"+(x.id===p.id?" selected":"")+">"+esc(x.name)+"</option>"}).join("")+"</select></label>":"";
- return"<article class='card order'><div class='tk'><b>#"+pad(o.no)+"</b><small>"+o.time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+"</small></div><div>"+
- "<div class='top'><span class='fn'>"+esc(o.file)+"</span><span class='tag "+o.status.split(" ")[0]+"'>"+o.status+"</span></div>"+
- "<div class='specs'><span class='sp'>"+o.sel+" of "+o.pages+" pages"+(o.range?" ("+esc(o.range)+")":"")+"</span><span class='sp'>"+o.copies+" cop"+(o.copies>1?"ies":"y")+"</span><span class='sp'>"+(isCol?"Colour":"B&W")+"</span><span class='sp'>"+o.size+"</span><span class='sp'>"+(o.sides==="double"?"Double-sided":"Single-sided")+"</span><span class='sp'>"+({1:"1x1",2:"1x2",4:"2x2",9:"3x3"})[o.nup]+" per sheet</span><span class='sp'>"+sheets*o.copies+" sheets total</span></div>"+
- ""+
- ids+(blocked?"<div class='bad'>This is a colour job. "+esc(p.name)+" can’t print colour. Choose the all-in-one.</div>":"")+(off?"<div class='bad'>"+esc(p.name)+" is offline. Switch printer or bring it online.</div>":"")+
- (needCash?"<div class='warn'>Confirm cash first. Printing is locked until then.</div>":"")+
- (o.status==="Printing"?"<div class='prog'><i style='width:"+o.prog+"%'></i></div>":"")+
- "<div class='foot'><div class='fl'>"+sel+"<div class='act'>"+actions+"</div></div><div class='pay"+((o.method==="upi"||o.cashIn)?"":" due")+"'>"+pay+"</div></div></div></article>"}
+NUP.forEach(function(n){var o=document.createElement("option");o.value=n[0];o.textContent=n[1]+(n[2]>1?"  ("+n[2]+" pages per sheet)":"");$("#s-nup").appendChild(o)});
 
-/* ===== events ===== */
-function find(id){return ORD.filter(function(o){return o.id===+id})[0]}
-function toast(m){var t=$("#toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.add("hide")},2600)}
-document.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
- if(b.dataset.f){filter=b.dataset.f;return draw()}
- if(b.dataset.tog){var p=pr(b.dataset.tog);p.online=!p.online;toast(p.name+(p.online?" is online":" is offline"));return draw()}
- var o=b.dataset.id&&find(b.dataset.id);if(!o)return;
- if(b.dataset.a==="cash"){o.cashIn=true;o.status="Paid";toast("Cash ₹"+o.amount+" recorded for #"+pad(o.no))}
- else if(b.dataset.a==="deliver"){o.status="Delivered";toast("#"+pad(o.no)+" handed over")}
- else if(b.dataset.a==="print"){send(o)}
- draw()});
-document.addEventListener("change",function(e){var t=e.target;
- if(t.dataset.def){DEF[t.dataset.def]=t.value;toast("Default for "+(t.dataset.def==="bw"?"B&W":"colour")+" jobs updated");draw()}
- if(t.dataset.pr){find(t.dataset.pr).printer=t.value;draw()}});
-$("#q").oninput=function(){query=this.value.trim();draw()};
-var PK={sb:["single","bw"],sc:["single","color"],db:["double","bw"],dc:["double","color"]};
-function openPr(){Object.keys(PK).forEach(function(k){$("#p-"+k).value=RATE[PK[k][0]][PK[k][1]]});$("#perr").textContent="";$("#pv").classList.remove("hide");$("#p-sb").focus()}
-function closePr(){$("#pv").classList.add("hide");$("#prb").focus()}
-$("#prb").onclick=openPr;$("#pcancel").onclick=closePr;
-$("#pv").onclick=function(e){if(e.target===this)closePr()};
-document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#pv").classList.contains("hide"))closePr()});
-$("#psave").onclick=function(){var v={},k;for(k in PK){var n=parseFloat($("#p-"+k).value);if(!(n>=0&&n<=999)){$("#perr").textContent="Enter a price from 0 to 999 in every field.";return}v[k]=Math.round(n*100)/100}
- for(k in PK)RATE[PK[k][0]][PK[k][1]]=v[k];closePr();toast("Prices saved. They apply to new orders.")};
+/* ===== parse page range ===== */
+function parseRange(str,total){str=(str||"").replace(/\s/g,"");var list=[],i;
+ if(!str){for(i=1;i<=total;i++)list.push(i);return{list:list}}
+ var seen={},parts=str.split(",");
+ for(i=0;i<parts.length;i++){var m=/^(\d+)(?:-(\d+))?$/.exec(parts[i]);
+  if(!m)return{err:"Use a format like 1-3, 5, 8-10."};var a=+m[1],b=m[2]?+m[2]:a;
+  if(a<1||b<a)return{err:"Page ranges must go from low to high, starting at 1."};
+  if(b>total)return{err:"This file has only "+plural(total,"page")+"."};
+  for(var p=a;p<=b;p++)seen[p]=1}
+ for(i=1;i<=total;i++)if(seen[i])list.push(i);return{list:list}}
+function calcFile(f){var r=parseRange(f.range,f.pages);if(r.err)return{err:r.err};
+ var n=r.list.length,np=nupOf(f.nup).n,faces=Math.ceil(n/np),sheets=f.sides==="double"?Math.ceil(faces/2):faces;
+ var per=CFG.rate[f.color]*CFG.mult[f.size],total=Math.round(faces*per*f.copies*2)/2;
+ return{list:r.list,n:n,faces:faces,sheets:sheets,total:total}}
 
-/* ===== printing (simulated). Production: POST /orders/:id/print -> print agent -> SumatraPDF/Windows print API ===== */
-function send(o){var p=printerFor(o);
- if(!p.online)return toast(p.name+" is offline");if(o.color==="color"&&!p.color)return toast("Choose a colour-capable printer");
- o.status="Printing";o.prog=0;
- toast("Printing #"+pad(o.no)+" on "+p.name+": "+(o.color==="color"?"colour":"B&W")+", "+o.size+", "+(o.sides==="double"?"duplex":"simplex")+", "+o.copies+" cop"+(o.copies>1?"ies":"y"));
- var iv=setInterval(function(){o.prog+=10;if(o.prog>=100){clearInterval(iv);o.status="Ready";o.prog=0}draw()},350)}
-draw();
+/* ===== file handling ===== */
+function ferr(m){$("#ferr").textContent=m||""}
+function addFiles(list){ferr("");var msgs=[],added=0;
+ Array.prototype.forEach.call(list,function(file){
+  if(F.length>=CFG.maxFiles){msgs.push("You can add up to "+CFG.maxFiles+" files per order.");return}
+  var ext=(file.name.split(".").pop()||"").toLowerCase();
+  if(!/^(pdf|jpe?g|png|docx?|heic)$/.test(ext)){msgs.push(file.name+": this file type isn’t supported. Upload a PDF, JPG or PNG.");return}
+  if(file.size>CFG.maxMB*1048576){msgs.push(file.name+" is larger than "+CFG.maxMB+" MB. Compress it or split it.");return}
+  var f={file:file,name:file.name,ext:ext,pages:1,known:true,color:"bw",size:"A4",orient:"portrait",sides:"single",nup:"1x1",range:"",copies:1,url:null,pdf:null,thumbs:{},pend:{},face:0,c:null};
+  if(/^(jpe?g|png)$/.test(ext)){f.url=URL.createObjectURL(file)}
+  else if(ext==="pdf"){readPdf(f)}
+  else{f.known=false}
+  F.push(f);added++});
+ if(msgs.length)ferr(msgs[0]);
+ if(added){A=F.length-1;build(true)}}
+function readPdf(f){f.file.arrayBuffer().then(function(buf){
+ var t=new TextDecoder("latin1").decode(new Uint8Array(buf));
+ f.pages=Math.max(1,(t.match(/\/Type\s*\/Page[^s]/g)||[]).length);
+ if(window.pdfjsLib){pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise.then(function(d){f.pdf=d;f.pages=d.numPages;sync()}).catch(function(){})}
+ sync()})}
+$("#fi").onchange=function(e){addFiles(e.target.files);e.target.value=""};
+$("#fa").onchange=function(e){addFiles(e.target.files);e.target.value=""};
+function removeFile(f){var i=F.indexOf(f);if(i<0)return;if(f.url)URL.revokeObjectURL(f.url);F.splice(i,1);A=Math.max(0,Math.min(A,F.length-1));ferr("");build(false)}
+
+/* page picture for the preview: image, rendered PDF page, or null (placeholder) */
+function pageSrc(f,p){if(f.url)return f.url;if(f.thumbs[p])return f.thumbs[p];
+ if(f.pdf&&!f.pend[p]){f.pend[p]=1;f.pdf.getPage(p).then(function(pg){var v=pg.getViewport({scale:1}),sc=480/v.width,vp=pg.getViewport({scale:sc});
+  var cv=document.createElement("canvas");cv.width=vp.width;cv.height=vp.height;
+  return pg.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise.then(function(){f.thumbs[p]=cv.toDataURL("image/jpeg",.72);renderPapers()})}).catch(function(){})}
+ return null}
+
+/* ===== carousel ===== */
+function build(scroll){var car=$("#car");car.innerHTML="";car.classList.toggle("single",F.length<2);
+ F.forEach(function(f){var s=document.createElement("div");s.className="slide";
+  s.innerHTML='<div class="stage"><div class="fn"></div><button class="x" type="button" aria-label="Remove file">×</button><div class="paper"></div><div class="sp hide"><button type="button" class="pv" aria-label="Previous sheet">‹</button><span></span><button type="button" class="nx" aria-label="Next sheet">›</button></div></div>';
+  s.querySelector(".fn").textContent=f.name;
+  s.querySelector(".x").onclick=function(){removeFile(f)};
+  s.querySelector(".pv").onclick=function(){f.face=Math.max(0,f.face-1);sync()};
+  s.querySelector(".nx").onclick=function(){f.face=f.face+1;sync()};
+  f.el=s;car.appendChild(s)});
+ sync(true);if(F.length)requestAnimationFrame(function(){goTo(A,scroll?"smooth":"auto")})}
+var lockUntil=0;
+function goTo(i,b){var s=F[i]&&F[i].el;if(!s)return;var car=$("#car");lockUntil=Date.now()+(b==="auto"?150:700);car.scrollTo({left:s.offsetLeft-(car.clientWidth-s.offsetWidth)/2,behavior:b||"smooth"})}
+var raf=0;$("#car").addEventListener("scroll",function(){if(raf||Date.now()<lockUntil)return;raf=requestAnimationFrame(function(){raf=0;
+ var car=$("#car"),mid=car.scrollLeft+car.clientWidth/2,best=0,bd=1e9;
+ F.forEach(function(f,i){if(!f.el)return;var d=Math.abs(f.el.offsetLeft+f.el.offsetWidth/2-mid);if(d<bd){bd=d;best=i}});
+ if(best!==A){A=best;sync()}})});
+window.addEventListener("resize",renderPapers);
+
+/* ===== live preview ===== */
+function renderPapers(){F.forEach(drawPaper)}
+function drawPaper(f){var s=f.el;if(!s)return;var st=s.querySelector(".stage"),paper=s.querySelector(".paper"),sp=s.querySelector(".sp");
+ var d=SIZES[f.size],w=d[0],h=d[1];if(f.orient==="landscape"){var t=w;w=h;h=t}
+ var availW=st.clientWidth-28,availH=st.clientHeight-84;if(availW<20)return;
+ var pw=Math.min(availW,availH*w/h),ph=pw*h/w;paper.style.width=pw+"px";paper.style.height=ph+"px";
+ var c=f.c||calcFile(f),list=c.err?parseRange("",f.pages).list:c.list,np=nupOf(f.nup),faces=Math.max(1,Math.ceil(list.length/np.n));
+ if(f.face>=faces)f.face=faces-1;
+ var cells=np.cols*np.rows,pages=list.slice(f.face*np.n,f.face*np.n+np.n);
+ paper.style.gridTemplateColumns="repeat("+np.cols+",minmax(0,1fr))";paper.style.gridTemplateRows="repeat("+np.rows+",minmax(0,1fr))";
+ paper.style.gap=(np.n>4?3:5)+"px";paper.style.padding=(np.n>4?5:7)+"px";
+ var key=[f.face,f.nup,f.color,pages.join(",")].join("|"),html="";
+ paper.innerHTML="";
+ for(var i=0;i<cells;i++){var cell=document.createElement("div");
+  if(i>=pages.length){cell.className="cell blank"}
+  else{var src=pageSrc(f,pages[i]);
+   if(src){cell.className="cell";var im=document.createElement("img");im.src=src;im.alt="Page "+pages[i];im.draggable=false;im.style.filter=f.color==="bw"?"grayscale(1) contrast(1.05)":"none";cell.appendChild(im)}
+   else{cell.className="cell ph";cell.innerHTML='<div style="width:100%;text-align:center"><em>'+(f.pdf?"…":f.ext.toUpperCase())+'</em><i></i><i></i><i style="width:45%"></i></div>'}}
+  paper.appendChild(cell)}
+ var dbl=f.sides==="double";
+ if(faces>1||(dbl&&false)){sp.classList.remove("hide");
+  var sheet=dbl?Math.floor(f.face/2)+1:f.face+1,totalSheets=dbl?Math.ceil(faces/2):faces;
+  sp.querySelector("span").textContent="Sheet "+sheet+" of "+totalSheets+(dbl?" · "+(f.face%2?"Back":"Front"):"");
+  sp.querySelector(".pv").disabled=f.face<=0;sp.querySelector(".nx").disabled=f.face>=faces-1}
+ else sp.classList.add("hide")}
+
+/* ===== sync UI ===== */
+function sync(rebuilt){
+ var has=F.length>0;
+ $("#cFile").classList.toggle("hide",has);$("#docs").classList.toggle("hide",!has);
+ F.forEach(function(f){f.c=calcFile(f)});
+ renderPapers();
+ var f=cur();
+ if(f){
+  var c=f.c,pg=c.err?f.pages:c.n;
+  $("#fileLine").textContent="File "+(A+1)+" ("+plural(f.pages,"page")+")";
+  setVal($("#cp"),f.copies);setVal($("#pgs"),f.pages);$("#pgRow").classList.toggle("hide",f.known);
+  document.querySelectorAll("#t-color .tile").forEach(function(t){t.setAttribute("aria-pressed",String(t.dataset.v===f.color))});
+  document.querySelectorAll("#t-orient .tile").forEach(function(t){t.setAttribute("aria-pressed",String(t.dataset.v===f.orient))});
+  var m=CFG.mult[f.size];$("#r-color").textContent=inr(CFG.rate.color*m)+"/page";$("#r-bw").textContent=inr(CFG.rate.bw*m)+"/page";
+  var d=SIZES[f.size];$("#d-por").textContent=d[0]+" x "+d[1]+" in";$("#d-lan").textContent=d[1]+" x "+d[0]+" in";
+  $("#s-sides").value=f.sides;$("#s-nup").value=f.nup;
+  setVal($("#range"),f.range);$("#rerr").textContent=c.err||"";$("#range").classList.toggle("bad",!!c.err)}
+ /* pager */
+ var pg=$("#pager");pg.innerHTML="";
+ if(F.length>1)F.forEach(function(x,i){if(i===A){var n=document.createElement("span");n.className="n";n.textContent=(i+1)+"/"+F.length;pg.appendChild(n)}
+  else{var b=document.createElement("button");b.type="button";b.className="d";b.setAttribute("aria-label","Go to file "+(i+1));b.onclick=function(){A=i;goTo(i);sync()};pg.appendChild(b)}});
+ /* bar */
+ var bad=-1,pages=0,sheets=0,total=0;
+ F.forEach(function(x,i){if(x.c.err){if(bad<0)bad=i}else{pages+=x.c.n*x.copies;sheets+=x.c.sheets*x.copies;total+=x.c.total}});
+ var ok=has&&bad<0;
+ if(ok){$("#tot").textContent=inr(total);$("#brk").innerHTML="Total "+plural(pages,"page")+"<small>"+plural(sheets,"sheet")+" · "+plural(F.length,"file")+"</small>"}
+ else{$("#tot").textContent=has?"–":"₹0";$("#brk").textContent=has?"Fix the page range in file "+(bad+1):"Add a document to see the price"}
+ document.querySelectorAll(".opt").forEach(function(o){o.setAttribute("aria-checked",String(o.dataset.m===S.method))});
+ $("#go").disabled=!ok;
+ $("#go").textContent=S.method==="upi"?"Pay "+(ok?inr(total):"")+" with UPI":"Send to counter · pay cash";
+ S.total=total;S.pages=pages;S.files=F.length}
+function setVal(el,v){if(document.activeElement!==el)el.value=v}
+var S={method:"upi",total:0,pages:0,files:0};
+
+/* ===== control handlers (all act on the file being previewed) ===== */
+function bind(sel,key,conv){document.querySelectorAll(sel).forEach(function(t){t.onclick=function(){var f=cur();if(!f)return;f[key]=t.dataset.v;f.face=0;sync()}})}
+bind("#t-color .tile","color");bind("#t-orient .tile","orient");
+$("#s-sides").onchange=function(){var f=cur();if(f){f.sides=this.value;sync()}};
+$("#s-nup").onchange=function(){var f=cur();if(f){f.nup=this.value;f.face=0;sync()}};
+$("#range").oninput=function(){var f=cur();if(f){f.range=this.value;f.face=0;sync()}};
+function setCopies(n){var f=cur();if(!f)return;f.copies=Math.max(1,Math.min(500,n||1));$("#cp").value=f.copies;sync()}
+$("#cp").onchange=function(){setCopies(parseInt(this.value,10))};
+$("#cm").onclick=function(){setCopies(cur().copies-1)};$("#cpp").onclick=function(){setCopies(cur().copies+1)};
+function setPages(n){var f=cur();if(!f)return;f.pages=Math.max(1,Math.min(999,n||1));$("#pgs").value=f.pages;sync()}
+$("#pgs").onchange=function(){setPages(parseInt(this.value,10))};
+$("#pm").onclick=function(){setPages(cur().pages-1)};$("#pp").onclick=function(){setPages(cur().pages+1)};
+document.querySelectorAll(".opt").forEach(function(o){function pick(){S.method=o.dataset.m;sync()}
+ o.onclick=pick;o.onkeydown=function(e){if(e.key===" "||e.key==="Enter"){e.preventDefault();pick()}}});
+
+/* ===== ticket numbers (daily reset, per shop) ===== */
+var mem={};
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){if(v===undefined)return mem[k]||null;mem[k]=v}}
+function nextTicket(){var d=new Date(),key="xf:"+CFG.shopId+":"+d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+ var n=(parseInt(store(key),10)||0)+1;store(key,String(n));return n}
+
+/* ===== payment ===== */
+/* Direct mode (default): shows a UPI QR + "Open UPI app" link for CFG.upiId with the amount filled in.
+   Money goes straight to the shop's account. Nothing confirms it automatically, so the ticket says the shop
+   will confirm the payment before printing.
+   YouPI mode: set CFG.gateway="youpi" and fill CFG.youpi after you host YouPI-PG (see notes with this file).
+   Either way, the print agent must only print an order after the SHOP/SERVER has confirmed the money, never because this page says "paid". */
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+var curPay=null;
+function newOrderId(){return"XF"+Date.now().toString(36).toUpperCase()}
+function upiUri(amt,oid){return"upi://pay?pa="+CFG.upiId+"&pn="+encodeURIComponent(CFG.shop)+"&am="+amt.toFixed(2)+"&cu=INR&tn="+encodeURIComponent("Print "+oid)}
+function openPay(c){curPay={c:c,oid:newOrderId()};var uri=upiUri(c.total,curPay.oid);
+ $("#pamt").textContent=inr(c.total);$("#vpa").textContent=CFG.upiId;
+ try{var q=qrcode(0,"M");q.addData(uri);q.make();$("#qr").innerHTML=q.createSvgTag({cellSize:4,margin:0,scalable:true})}catch(e){$("#qr").textContent="QR unavailable. Use the button below."}
+ $("#p1").classList.remove("hide");$("#p2").classList.add("hide");$("#utr").value="";$("#uerr").textContent="";$("#utr").classList.remove("bad");$("#veil").classList.remove("hide")}
+function closePay(){$("#veil").classList.add("hide")}
+$("#upiapp").onclick=function(){if(curPay)location.href=upiUri(curPay.c.total,curPay.oid)};
+$("#copyv").onclick=function(){var b=this;try{navigator.clipboard.writeText(CFG.upiId).then(function(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy"},1500)})}catch(e){}};
+$("#pcancel").onclick=closePay;
+$("#veil").onclick=function(e){if(e.target===this&&$("#p2").classList.contains("hide"))closePay()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#veil").classList.contains("hide")&&$("#p2").classList.contains("hide"))closePay()});
+$("#pay").onclick=function(){var u=$("#utr").value.trim();
+ if(u&&!/^\d{12}$/.test(u)){$("#uerr").textContent="A UPI reference number has 12 digits. Leave it blank if you can’t find it.";$("#utr").classList.add("bad");return}
+ var c=curPay.c;closePay();finish(c,"upi-pending",u)};
+
+/* YouPI-PG checkout (only used when CFG.gateway==="youpi" and src + key are set) */
+function youpiReady(){return CFG.gateway==="youpi"&&CFG.youpi.src&&CFG.youpi.key}
+function loadYoupi(){return new Promise(function(res,rej){if(window.Youpi)return res();
+ var sc=document.createElement("script");sc.src=CFG.youpi.src;sc.setAttribute("data-youpi-key",CFG.youpi.key);sc.setAttribute("data-currency","INR");
+ sc.onload=function(){window.Youpi?res():rej()};sc.onerror=rej;document.head.appendChild(sc)})}
+function startYoupi(c){var oid=newOrderId();$("#p1").classList.add("hide");$("#p2").classList.remove("hide");$("#veil").classList.remove("hide");
+ loadYoupi().then(function(){window.Youpi.pay({order_id:oid,amount:c.total,currency:"INR",name:CFG.shop,description:c.files+" file(s), "+c.pages+" page(s)",
+  handler:function(r){closePay();if(r&&/SUCCESS/i.test(String(r.status||"")))finish(c,"upi-pending",r.utr||"");else ferr("Payment wasn’t completed. No order was placed.")},
+  onClose:function(){closePay()}})}).catch(function(){closePay();ferr("Couldn’t reach the payment service. Try again, or choose cash at the counter.")})}
+$("#go").onclick=function(){var c=summary();if(!c)return;if(S.method!=="upi")finish(c,"cash");else if(youpiReady())startYoupi(c);else openPay(c)};
+
+/* ===== order summary across all files ===== */
+function summary(){var t=0,p=0;for(var i=0;i<F.length;i++){var c=calcFile(F[i]);if(c.err)return null;t+=c.total;p+=c.n*F[i].copies}
+ return F.length?{total:t,pages:p,files:F.length}:null}
+
+/* ===== ticket + live status ===== */
+var timers=[],STEPS=["Paid","Printing","Ready","Delivered"];
+function setStep(i,msg){$("#steps").innerHTML="";STEPS.forEach(function(s,j){var d=document.createElement("div");d.className="st"+(j<=i?" on":"");var b=document.createElement("i");d.appendChild(b);d.appendChild(document.createTextNode(s));$("#steps").appendChild(d)});$("#stmsg").textContent=msg}
+function finish(c,m,utr){var n=nextTicket(),no="#"+String(n).padStart(3,"0");
+ $("#vOrder").classList.add("hide");$("#bar").classList.add("hide");$("#vTicket").classList.remove("hide");window.scrollTo(0,0);
+ $("#tno").textContent=no;
+ $("#tsum").textContent=(c.files>1?c.files+" files":F[0].name)+" · "+c.pages+" page"+(c.pages>1?"s":"")+" · "+inr(c.total);
+ $("#tnow").textContent="Now serving #"+String(Math.max(0,n-Math.min(n,3))).padStart(3,"0")+" · "+Math.min(n,3)+" ahead of you";
+ timers.forEach(clearTimeout);timers=[];
+ if(m==="upi-pending"){$("#tTitle").textContent="Payment sent. You’re in the queue";$("#tSub").textContent="Show this number at the counter. The shop confirms your "+inr(c.total)+" UPI payment before printing."+(utr?" Reference: "+utr+".":"");
+  setStep(-1,"Waiting for the shop to confirm your UPI payment. Printing starts after that.")}
+ else if(m==="upi"){$("#tTitle").textContent="Paid. You’re in the queue";$("#tSub").textContent="Show this number at the counter when it’s ready.";
+  setStep(0,"Payment confirmed by the gateway.");
+  timers.push(setTimeout(function(){setStep(1,"Printing on the shop’s machine.")},3000));
+  timers.push(setTimeout(function(){setStep(2,"Ready. Show ticket "+no+" at the counter.");$("#tnow").textContent="Your order is ready"},9000))}
+ else{$("#tTitle").textContent="Order sent to counter";$("#tSub").textContent="Pay "+inr(c.total)+" in cash at the counter and quote this number.";
+  setStep(-1,"Waiting for staff to confirm your cash payment. Printing starts after that.");
+  timers.push(setTimeout(function(){setStep(0,"Cash received and confirmed by staff.")},6000));
+  timers.push(setTimeout(function(){setStep(1,"Printing on the shop’s machine.")},9000));
+  timers.push(setTimeout(function(){setStep(2,"Ready. Show ticket "+no+" at the counter.");$("#tnow").textContent="Your order is ready"},14000))}}
+$("#again").onclick=function(){timers.forEach(clearTimeout);F.forEach(function(f){if(f.url)URL.revokeObjectURL(f.url)});F=[];A=0;$("#car").innerHTML="";ferr("");
+ $("#vTicket").classList.add("hide");$("#vOrder").classList.remove("hide");$("#bar").classList.remove("hide");sync();window.scrollTo(0,0)};
+sync();
 </script>
 </body>
 </html>
