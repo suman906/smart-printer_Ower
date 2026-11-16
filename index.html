@@ -121,7 +121,7 @@ function fromDB(k,d,old){var fl=d.files||[],sel=0,sheets=0,col=false;
  return{id:k,no:d.ticket,name:d.name||"",file:fl.map(function(f){return f.file}).join(", ")||"(no file)",files:fl,
   pages:fl.reduce(function(s,f){return s+f.pages},0),sel:sel,range:fl.length===1?(f0.range||""):"",copies:f0.copies||1,size:f0.size||"A4",
   color:col?"color":"bw",sides:f0.sides||"single",nup:f0.nup||1,amount:d.amount,method:d.method,cashIn:d.status!=="Awaiting cash"&&d.method==="cash",
-  status:d.status||"Awaiting cash",printer:d.printer||null,prog:old?old.prog:0,time:new Date(d.createdAt||Date.now()),doneAt:d.deliveredAt||null}}
+  status:d.status||"Awaiting cash",printer:d.printer||null,prog:old?old.prog:0,time:new Date(d.createdAt||Date.now()),doneAt:d.deliveredAt||null,uploaded:!!d.uploaded,uploadErr:d.uploadErr||"",printError:d.printError||""}}
 function put(k,d){var old=ORD.filter(function(x){return x.id===k})[0],n=fromDB(k,d,old);
  if(old)ORD[ORD.indexOf(old)]=n;else ORD.push(n)}
 function upd(o,f){if(!DB)return toast("Not connected");SH("orders/"+o.id).update(f).catch(function(){toast("Could not save. Check connection or database rules.")})}
@@ -141,7 +141,8 @@ if(DB){
 var DAYMS=864e5;
 function doneTime(o){return o.doneAt||o.time.getTime()}
 function expired(o){return o.status==="Delivered"&&Date.now()-doneTime(o)>=DAYMS}
-function purge(){if(!DB)return;ORD.filter(expired).forEach(function(o){SH("orders/"+o.id).remove().catch(function(){})})}
+function dropFiles(o){if(!DB)return;(o.files||[]).forEach(function(f,i){SH("files/"+o.id+"_"+i).remove();SH("filedata/"+o.id+"_"+i).remove()})}
+function purge(){if(!DB)return;ORD.filter(expired).forEach(function(o){dropFiles(o);SH("orders/"+o.id).remove().catch(function(){})})}
 function histDraw(){var el=$("#hl"+"ist");if($("#hv").classList.contains("hide"))return;
  var H=ORD.filter(function(o){return o.status==="Delivered"&&!expired(o)}).sort(function(a,b){return doneTime(b)-doneTime(a)});
  el.innerHTML=H.length?H.map(function(o){var d=new Date(doneTime(o)),left=Math.max(0,Math.ceil((DAYMS-(Date.now()-doneTime(o)))/36e5));
@@ -200,7 +201,7 @@ function card(o){var p=printerFor(o),pn=p?p.name:"",sides=Math.ceil(o.sel/o.nup)
  var blocked=isCol&&p&&!p.color,off=p&&pstat(p)==="offline",noP=!p,needCash=o.status==="Awaiting cash"||o.status==="Awaiting UPI";
  var ids="<div class='nm'>Name <b>"+(o.name?esc(o.name):"—")+"</b></div>";var pay=o.method==="upi"?(o.status==="Awaiting UPI"?"<div class='amt'>UPI to verify <b>₹"+o.amount+"</b></div>":"<div class='amt'>UPI paid <b>₹"+o.amount+"</b></div>")
   :(o.cashIn?"<div class='amt'>Cash received <b>₹"+o.amount+"</b></div>":"<div class='amt'>Cash to collect <b>₹"+o.amount+"</b></div>");
- var can=(o.status==="Paid"||o.status==="Ready"||o.status==="Delivered")&&!blocked&&!off&&!noP;
+ var can=(o.status==="Paid"||o.status==="Ready"||o.status==="Delivered")&&!blocked&&!off&&!noP&&o.uploaded;
  var actions="";
  if(o.status==="Awaiting UPI")actions+="<button class='btn' data-a='upi' data-id='"+o.id+"' type='button'>UPI received ₹"+o.amount+"</button>";
  if(o.status==="Awaiting cash")actions+="<button class='btn' data-a='cash' data-id='"+o.id+"' type='button'>Cash received ₹"+o.amount+"</button>";
@@ -208,12 +209,13 @@ function card(o){var p=printerFor(o),pn=p?p.name:"",sides=Math.ceil(o.sel/o.nup)
  if(o.status==="Printing")actions+="<span class='lab'>Sending to "+esc(pn)+"…</span>";
  if(o.status==="Ready"||o.status==="Delivered")actions+="<button class='btn alt' data-a='print' data-id='"+o.id+"' type='button'"+(can?"":" disabled")+">Reprint</button>";
  if(o.status==="Ready")actions+="<button class='btn' data-a='deliver' data-id='"+o.id+"' type='button'>Handed over</button>";
+ actions+="<button class='btn alt' data-a='del' data-id='"+o.id+"' type='button'"+(pendDel===o.id?" style='background:var(--acc);color:var(--acc-ink)'":"")+">"+(pendDel===o.id?"Tap again to delete":"Delete")+"</button>";
  var sel=(o.status==="Paid"||/^Awaiting/.test(o.status)||o.status==="Ready")?"<label class='lab'>Printer <select data-pr='"+o.id+"' aria-label='Printer for ticket "+pad(o.no)+"'>"+P.map(function(x){return"<option value='"+esc(x.id)+"'"+(p&&x.id===p.id?" selected":"")+">"+esc(x.name)+"</option>"}).join("")+"</select></label>":"";
  return"<article class='card order'><div class='tk'><b>#"+pad(o.no)+"</b><small>"+o.time.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})+"</small></div><div>"+
  "<div class='top'><span class='fn'>"+esc(o.file)+"</span><span class='tag "+o.status.split(" ")[0]+"'>"+o.status+"</span></div>"+
  (o.files.length>1?"<div class='specs'>"+o.files.map(function(f){return"<span class='sp'>"+esc(f.file)+" · "+f.sel+" pg × "+f.copies+" · "+(f.color==="color"?"Colour":"B&W")+" · "+f.size+" · "+(f.sides==="double"?"2-sided":"1-sided")+"</span>"}).join("")+"</div>":"")+(o.files.length>1?"":"<div class='specs'><span class='sp'>"+o.sel+" of "+o.pages+" pages"+(o.range?" ("+esc(o.range)+")":"")+"</span><span class='sp'>"+o.copies+" cop"+(o.copies>1?"ies":"y")+"</span><span class='sp'>"+(isCol?"Colour":"B&W")+"</span><span class='sp'>"+o.size+"</span><span class='sp'>"+(o.sides==="double"?"Double-sided":"Single-sided")+"</span><span class='sp'>"+({1:"1x1",2:"1x2",4:"2x2",9:"3x3"})[o.nup]+" per sheet</span><span class='sp'>"+sheets*o.copies+" sheets total</span></div>")+
  ""+
- ids+(noP?"<div class='bad'>No printer added. Tap “Add printer” at the top.</div>":"")+(blocked?"<div class='bad'>This is a colour job. "+esc(pn)+" can’t print colour. Choose the all-in-one.</div>":"")+(off?"<div class='bad'>"+esc(pn)+" is offline. Switch printer or bring it online.</div>":"")+
+ ids+(!o.uploaded&&o.status!=="Delivered"?(o.uploadErr?"<div class='bad'>The customer’s file did not upload: "+esc(o.uploadErr)+". Ask them to send it again.</div>":"<div class='warn'>Waiting for the customer’s file to arrive…</div>"):"")+(o.printError?"<div class='bad'>Print failed: "+esc(o.printError)+"</div>":"")+(noP?"<div class='bad'>No printer added. Tap “Add printer” at the top.</div>":"")+(blocked?"<div class='bad'>This is a colour job. "+esc(pn)+" can’t print colour. Choose the all-in-one.</div>":"")+(off?"<div class='bad'>"+esc(pn)+" is offline. Switch printer or bring it online.</div>":"")+
  (needCash?"<div class='warn'>Confirm the "+(o.status==="Awaiting UPI"?"UPI payment in your bank app":"cash")+" first. Printing is locked until then.</div>":"")+
  (o.status==="Printing"?"<div class='prog'><i style='width:"+o.prog+"%'></i></div>":"")+
  "<div class='foot'><div class='fl'>"+sel+"<div class='act'>"+actions+"</div></div><div class='pay"+((o.method==="upi"||o.cashIn)?"":" due")+"'>"+pay+"</div></div></div></article>"}
@@ -221,6 +223,12 @@ function card(o){var p=printerFor(o),pn=p?p.name:"",sides=Math.ceil(o.sel/o.nup)
 /* ===== events ===== */
 function find(id){return ORD.filter(function(o){return o.id===id})[0]}
 function toast(m){var t=$("#toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.add("hide")},2600)}
+var pendDel=null,delT=null;
+function delOrder(o){if(!DB)return toast("Not connected");
+ if(pendDel!==o.id){pendDel=o.id;clearTimeout(delT);delT=setTimeout(function(){pendDel=null;draw()},4000);return}
+ pendDel=null;clearTimeout(delT);dropFiles(o);
+ Object.keys(JOBS).forEach(function(k){if(JOBS[k]&&JOBS[k].orderId===o.id){SH("jobs/"+k).remove();delete JOBS[k]}});
+ SH("orders/"+o.id).remove().then(function(){toast("#"+pad(o.no)+" deleted")}).catch(function(){toast("Could not delete. Check connection or database rules.")})}
 document.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
  if(b.dataset.f){filter=b.dataset.f;return draw()}
  if(b.dataset.rm)return removePrinter(b.dataset.rm);
@@ -229,8 +237,9 @@ document.addEventListener("click",function(e){var b=e.target.closest("button");i
  var o=b.dataset.id&&find(b.dataset.id);if(!o)return;
  if(b.dataset.a==="cash"){upd(o,{status:"Paid",cashIn:true});toast("Cash ₹"+o.amount+" recorded for #"+pad(o.no))}
  else if(b.dataset.a==="upi"){upd(o,{status:"Paid"});toast("UPI ₹"+o.amount+" confirmed for #"+pad(o.no))}
- else if(b.dataset.a==="deliver"){upd(o,{status:"Delivered",deliveredAt:Date.now()});toast("#"+pad(o.no)+" handed over")}
+ else if(b.dataset.a==="deliver"){upd(o,{status:"Delivered",deliveredAt:Date.now()});dropFiles(o);toast("#"+pad(o.no)+" handed over")}
  else if(b.dataset.a==="print"){send(o)}
+ else if(b.dataset.a==="del"){delOrder(o)}
  draw()});
 document.addEventListener("change",function(e){var t=e.target;
  if(t.dataset.def){if(!t.value)return;DEF[t.dataset.def]=t.value;if(DB)SH("settings/defaults").set(DEF);toast("Default for "+(t.dataset.def==="bw"?"B&W":"colour")+" jobs updated");draw()}
@@ -247,10 +256,28 @@ $("#psave").onclick=function(){var v={},k;for(k in PK){var n=parseFloat($("#p-"+
 
 /* ===== printing (still simulated here). Real printing needs the print agent to send the file to the chosen printer ===== */
 function send(o){var p=printerFor(o);
- if(!p)return toast("Add a printer first");if(pstat(p)==="offline")return toast(p.name+" is offline");if(o.color==="color"&&!p.color)return toast("Choose a colour-capable printer");
- o.status="Printing";o.prog=0;upd(o,{status:"Printing"});
- toast("Printing #"+pad(o.no)+" on "+p.name+": "+(o.color==="color"?"colour":"B&W")+", "+o.size+", "+(o.sides==="double"?"duplex":"simplex")+", "+o.copies+" cop"+(o.copies>1?"ies":"y"));
- var iv=setInterval(function(){var c=find(o.id)||o;c.prog+=10;if(c.prog>=100){clearInterval(iv);c.status="Ready";c.prog=0;upd(c,{status:"Ready"})}draw()},350)}
+ if(!p)return toast("Add a printer first");if(pstat(p)==="offline")return toast(p.name+" is offline");
+ if(o.color==="color"&&!p.color)return toast("Choose a colour-capable printer");
+ if(!o.uploaded)return toast("The customer’s file hasn’t arrived yet");
+ if(!DB)return toast("Not connected");
+ if(!agentAlive())return toast("Print agent isn’t running on the shop PC. Start print-agent.js, then try again.");
+ var prev=o.status==="Ready"?"Ready":"Paid";
+ var job={orderId:o.id,ticket:o.no,printer:p.name,prev:prev,status:"queued",createdAt:Date.now(),
+  files:o.files.map(function(f,i){return{idx:i,name:f.file,sel:f.sel,range:f.range||"",copies:f.copies,size:f.size,color:f.color,sides:f.sides,nup:f.nup}})};
+ o.status="Printing";o.prog=5;o.printError="";
+ upd(o,{status:"Printing",printError:null});
+ SH("jobs").push().set(job).then(function(){toast("Sent #"+pad(o.no)+" to "+p.name+"…")}).catch(function(){upd(o,{status:prev,printError:"Could not create the print job"})});
+ draw()}
+/* ===== print jobs: the print agent picks them up and reports back ===== */
+var JOBS={},JPROG={queued:8,downloading:35,printing:70};
+function jobEvt(k,j){if(!j)return;JOBS[k]=j;var o=find(j.orderId);if(!o)return;
+ if(j.status==="done"){upd(o,{status:"Ready",printError:null});SH("jobs/"+k).remove();delete JOBS[k];toast("#"+pad(o.no)+" printed on "+j.printer)}
+ else if(j.status==="error"){upd(o,{status:j.prev||"Paid",printError:j.error||"Print failed"});SH("jobs/"+k).remove();delete JOBS[k];toast("Printing #"+pad(o.no)+" failed")}
+ else{o.prog=JPROG[j.status]||o.prog;draw()}}
+if(DB){SH("jobs").on("child_added",function(s){jobEvt(s.key,s.val())});SH("jobs").on("child_changed",function(s){jobEvt(s.key,s.val())});
+ setInterval(function(){var n=Date.now();Object.keys(JOBS).forEach(function(k){var j=JOBS[k],age=n-(j.createdAt||n);
+  if((j.status==="queued"&&age>45000)||(j.status!=="queued"&&age>240000)){delete JOBS[k];
+   SH("jobs/"+k).update({status:"error",error:j.status==="queued"?"The print agent didn’t pick up the job. Is print-agent.js running on the shop PC?":"Printing timed out"})}})},5000)}
 draw();
 </script>
 </body>
