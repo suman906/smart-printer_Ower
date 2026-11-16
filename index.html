@@ -263,7 +263,7 @@ function send(o){var p=printerFor(o);
  if(!agentAlive())return toast("Print agent isn’t running on the shop PC. Start print-agent.js, then try again.");
  var prev=o.status==="Ready"?"Ready":"Paid";
  var job={orderId:o.id,ticket:o.no,printer:p.name,prev:prev,status:"queued",createdAt:Date.now(),
-  files:o.files.map(function(f,i){return{idx:i,name:f.file,sel:f.sel,range:f.range||"",copies:f.copies,size:f.size,color:f.color,sides:f.sides,nup:f.nup}})};
+  files:o.files.map(function(f,i){return{idx:i,name:f.file,sel:f.sel,range:f.range||"",copies:f.copies,size:f.size,color:f.color,orient:f.orient||"portrait",sides:f.sides,nup:f.nup}})};
  o.status="Printing";o.prog=5;o.printError="";
  upd(o,{status:"Printing",printError:null});
  SH("jobs").push().set(job).then(function(){toast("Sent #"+pad(o.no)+" to "+p.name+"…")}).catch(function(){upd(o,{status:prev,printError:"Could not create the print job"})});
